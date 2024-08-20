@@ -99,6 +99,9 @@ fn main() {
     // Move to 0
     print!("\x1b[H");
 
+    // Hide the cursor
+    print!("\x1b[?25l");
+
     println!("Welcome to terminal_snake");
     
     game_loop();
