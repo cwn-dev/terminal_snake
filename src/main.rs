@@ -71,6 +71,23 @@ fn handle_input() {
     buffer = [0; 3]; // Clear buffer for next input
 }
 
+pub struct Coords {
+    x: u16,
+    y: u16
+}
+
+enum Directions {
+    Up,
+    Down,
+    Right,
+    Left
+}
+
+pub struct SnakeStatus {
+    position: Coords,
+    direction: Directions
+}
+
 fn draw_snake() {
     let (cols, rows) = get_console_size();
     let middle_x = (cols + 1) / 2;
