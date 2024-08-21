@@ -103,8 +103,8 @@ fn draw_snake(mut state: GameState) -> GameState {
     match state.snake.direction {
         Directions::Down => println!("║"),
         Directions::Up =>  println!("║"),
-        Directions::Left => println!("═"), // 2x ═ ═ - may have to double array size when moving horizontally
-        Directions::Right => println!("═"), // 2x ═ ═  ^^
+        Directions::Left => println!("═"),
+        Directions::Right => println!("═"),
         _ => println!("║")
     };
 
@@ -126,7 +126,7 @@ fn game_loop() {
         state = handle_input(state);
         state = draw_snake(state);
 
-        thread::sleep(Duration::from_secs(1/60));
+        thread::sleep(Duration::from_secs(1/2)); // 2fps
     }
 }
 
@@ -174,7 +174,13 @@ enum Directions {
 pub struct SnakeStatus {
     // The position of each block making up the body of snake
     // and [0] being the head
-    // The idea is that 
+    // The idea is that when snake is moving e.g. left, block 0
+    // Y would be decreasing on each tick.
+    // This array should be looped through on each tick so that 
+    // we can update all part of snakes body according to the current direction.
+    // Snake would want to look like he's moving in that direction, and so
+    // on each tick we would need to remove the last element, add a new element
+    // to the top of the array which would be in the position the head has moved to
     positions: [Coords; 1],
 
     // Holds the direction snake's head is currently facing
