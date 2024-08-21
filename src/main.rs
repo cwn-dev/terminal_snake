@@ -44,7 +44,11 @@ fn get_console_size() -> (u16, u16) {
     (ws.ws_col as u16, ws.ws_row as u16)
 }
 
-fn handle_input() {
+fn handle_input(mut state: GameState) -> GameState {
+    if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
+        return state
+    }
+
     let mut buffer = [0; 3]; // Buffer to store input characters
 
     let _ = io::stdin().read(&mut buffer);
@@ -52,55 +56,75 @@ fn handle_input() {
         //println!("CTRL+X");
     }
 
+    // Left Arrow
     if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x44 {
-        //println!("Left Arrow");
+        state.snake.positions[0].x -= 1;
+        state.snake.direction = Directions::Left;
     }
 
+    // Right Arrow
     if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x43 {
-        //println!("Right Arrow");
+        state.snake.positions[0].x += 1;
+        state.snake.direction = Directions::Right;
     }
 
-    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x41 {
-        //println!("Up Arrow");
+    // Up Arrow
+    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x41 {        
+        state.snake.positions[0].y -= 1;
+        state.snake.direction = Directions::Up;
     }
 
+    // Down Arrow
     if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x42 {
-        //println!("Down Arrow");
+        state.snake.positions[0].y += 1;
+        state.snake.direction = Directions::Down;
     }
 
     buffer = [0; 3]; // Clear buffer for next input
+
+    state
 }
 
-pub struct Coords {
-    x: u16,
-    y: u16
-}
+fn draw_snake(mut state: GameState) -> GameState {
+    if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
+        let (cols, rows) = get_console_size();
+        let middle_x = (cols + 1) / 2;
+        let middle_y = (rows + 1) / 2;
 
-enum Directions {
-    Up,
-    Down,
-    Right,
-    Left
-}
+        state.snake.positions[0].x = middle_x;
+        state.snake.positions[0].y = middle_y;
 
-pub struct SnakeStatus {
-    position: Coords,
-    direction: Directions
-}
+        return state
+    }
 
-fn draw_snake() {
-    let (cols, rows) = get_console_size();
-    let middle_x = (cols + 1) / 2;
-    let middle_y = (rows + 1) / 2;
+    let snake_head_pos = &state.snake.positions[0];
+    print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
 
-    print!("\x1b[{};{}f", middle_y, middle_x);
-    println!("║");
+    match state.snake.direction {
+        Directions::Down => println!("║"),
+        Directions::Up =>  println!("║"),
+        Directions::Left => println!("═"), // 2x ═ ═ - may have to double array size when moving horizontally
+        Directions::Right => println!("═"), // 2x ═ ═  ^^
+        _ => println!("║")
+    };
+
+    // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
+    //println!("{:?}", &state);
+
+    state
 }
 
 fn game_loop() {
+    let mut state = GameState {
+        snake: SnakeStatus {
+            positions: [Coords { x: 0, y: 0 }; 1],
+            direction: Directions::None
+        }
+    };
+
     loop {
-        handle_input();
-        draw_snake();
+        state = handle_input(state);
+        state = draw_snake(state);
 
         thread::sleep(Duration::from_secs(1/60));
     }
@@ -120,6 +144,7 @@ fn main() {
     print!("\x1b[?25l");
 
     println!("Welcome to terminal_snake");
+    println!("Press any key to start");
     
     game_loop();
 
@@ -127,4 +152,36 @@ fn main() {
     unsafe {
         tcsetattr(STDIN_FILENO, TCSANOW, &original_term);
     }
+}
+
+// Move these
+#[derive(Debug)]
+pub struct Coords {
+    x: u16,
+    y: u16
+}
+
+#[derive(Debug)]
+enum Directions {
+    None,
+    Up,
+    Down,
+    Right,
+    Left
+}
+
+#[derive(Debug)]
+pub struct SnakeStatus {
+    // The position of each block making up the body of snake
+    // and [0] being the head
+    // The idea is that 
+    positions: [Coords; 1],
+
+    // Holds the direction snake's head is currently facing
+    direction: Directions,
+}
+
+#[derive(Debug)]
+pub struct GameState {
+    snake: SnakeStatus
 }
