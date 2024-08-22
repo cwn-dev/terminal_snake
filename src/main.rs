@@ -1,10 +1,13 @@
 extern crate libc;
 
 use libc::{termios, TCSANOW, tcgetattr, tcsetattr, STDIN_FILENO, ioctl, winsize, TIOCGWINSZ};
-use std::io::{self, Read};
+use std::io::Read;
 use std::mem;
 use std::thread;
 use std::time::Duration;
+use std::fs::File;
+use std::os::unix::io::AsRawFd;
+use std::os::unix::io::FromRawFd;
 
 fn set_raw_mode() -> termios {
     let mut term = unsafe { mem::zeroed::<termios>() };
@@ -44,45 +47,44 @@ fn get_console_size() -> (u16, u16) {
     (ws.ws_col as u16, ws.ws_row as u16)
 }
 
-fn handle_input(mut state: GameState) -> GameState {
+fn handle_input(mut state: GameState, mut file: &File) -> GameState {
     if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
         return state
     }
 
     let mut buffer = [0; 3]; // Buffer to store input characters
 
-    let _ = io::stdin().read(&mut buffer);
-    if buffer[0] == 0x18 && buffer[1] == 0x00 && buffer[2] == 0x00 {
-        //println!("CTRL+X");
+    match file.read(&mut buffer) {
+        Ok(0) => { 
+            state
+        },
+        Ok(_) => {
+            // Left Arrow
+            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x44 {
+                state.snake.direction = Directions::Left;
+            }
+
+            // Right Arrow
+            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x43 {
+                state.snake.direction = Directions::Right;
+            }
+
+            // Up Arrow
+            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x41 {        
+                state.snake.direction = Directions::Up;
+            }
+
+            // Down Arrow
+            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x42 {
+                state.snake.direction = Directions::Down;
+            }
+
+            state
+        },
+        Err(_) => {
+            return state
+        }
     }
-
-    // Left Arrow
-    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x44 {
-        state.snake.positions[0].x -= 1;
-        state.snake.direction = Directions::Left;
-    }
-
-    // Right Arrow
-    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x43 {
-        state.snake.positions[0].x += 1;
-        state.snake.direction = Directions::Right;
-    }
-
-    // Up Arrow
-    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x41 {        
-        state.snake.positions[0].y -= 1;
-        state.snake.direction = Directions::Up;
-    }
-
-    // Down Arrow
-    if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x42 {
-        state.snake.positions[0].y += 1;
-        state.snake.direction = Directions::Down;
-    }
-
-    buffer = [0; 3]; // Clear buffer for next input
-
-    state
 }
 
 fn draw_snake(mut state: GameState) -> GameState {
@@ -100,6 +102,8 @@ fn draw_snake(mut state: GameState) -> GameState {
     let snake_head_pos = &state.snake.positions[0];
     print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
 
+    state.snake.step();
+
     match state.snake.direction {
         Directions::Down => println!("║"),
         Directions::Up =>  println!("║"),
@@ -114,25 +118,35 @@ fn draw_snake(mut state: GameState) -> GameState {
     state
 }
 
-fn game_loop() {
+fn game_loop(file: File) {
     let mut state = GameState {
-        snake: SnakeStatus {
-            positions: [Coords { x: 0, y: 0 }; 1],
-            direction: Directions::None
-        }
+        snake: Snake {
+            positions: [Coords { x: 0, y: 0 }; 20],
+            direction: Directions::Up
+        },
     };
 
     loop {
-        state = handle_input(state);
+        state = handle_input(state, &file);
         state = draw_snake(state);
 
-        thread::sleep(Duration::from_secs(1/2)); // 2fps
+        //thread::sleep(Duration::from_millis(16)); // about 60 fps
+        thread::sleep(Duration::from_millis(1000));
     }
 }
 
 fn main() {
     // Set terminal to raw mode
     let original_term = set_raw_mode();
+
+    let stdin = 0;
+    let file = unsafe { File::from_raw_fd(stdin) };
+    let fd = file.as_raw_fd();
+
+    unsafe {
+        let flags = libc::fcntl(fd, libc::F_GETFL, 0);
+        libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
+    }
 
     // Clear the screen
     print!("\x1b[2J");
@@ -146,7 +160,7 @@ fn main() {
     println!("Welcome to terminal_snake");
     println!("Press any key to start");
     
-    game_loop();
+    game_loop(file);
 
     // Restore original terminal settings
     unsafe {
@@ -155,7 +169,7 @@ fn main() {
 }
 
 // Move these
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Coords {
     x: u16,
     y: u16
@@ -170,8 +184,14 @@ enum Directions {
     Left
 }
 
+impl PartialEq for Directions {
+    fn eq(&self, other: &Self) -> bool {
+        self == other
+    }
+}
+
 #[derive(Debug)]
-pub struct SnakeStatus {
+pub struct Snake {
     // The position of each block making up the body of snake
     // and [0] being the head
     // The idea is that when snake is moving e.g. left, block 0
@@ -181,13 +201,30 @@ pub struct SnakeStatus {
     // Snake would want to look like he's moving in that direction, and so
     // on each tick we would need to remove the last element, add a new element
     // to the top of the array which would be in the position the head has moved to
-    positions: [Coords; 1],
+    positions: [Coords; 20],
 
     // Holds the direction snake's head is currently facing
     direction: Directions,
 }
 
+impl Snake {
+    pub fn step(&mut self) -> &mut Snake {
+        // if snake is 1, just move forward - erase old block, write new block
+        // if he is > 1, pop bit off tail and push on top in the direction you're going
+
+        match self.direction {
+            Directions::Up => self.positions[0].y -= 1,
+            Directions::Down => self.positions[0].y += 1,
+            Directions::Left => self.positions[0].x -= 1,
+            Directions::Right => self.positions[0].x += 1,
+            _ => {}
+        }
+
+        self
+    }
+}
+
 #[derive(Debug)]
 pub struct GameState {
-    snake: SnakeStatus
+    snake: Snake
 }
