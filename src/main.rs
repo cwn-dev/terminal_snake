@@ -32,6 +32,19 @@ fn set_raw_mode() -> termios {
     original_term
 }
 
+fn set_non_blocking_stdin() -> File {
+    let stdin = 0;
+    let file = unsafe { File::from_raw_fd(stdin) };
+    let fd = file.as_raw_fd();
+
+    unsafe {
+        let flags = libc::fcntl(fd, libc::F_GETFL, 0);
+        libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
+    }
+
+    file
+}
+
 fn get_console_size() -> (u16, u16) {
     let mut ws = winsize {
         ws_row: 0,
@@ -88,6 +101,7 @@ fn handle_input(mut state: GameState, mut file: &File) -> GameState {
 }
 
 fn draw_snake(mut state: GameState) -> GameState {
+    // If snake's head is at 0,0 then this is a new game, so put snake in the middle
     if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
         let (cols, rows) = get_console_size();
         let middle_x = (cols + 1) / 2;
@@ -136,17 +150,8 @@ fn game_loop(file: File) {
 }
 
 fn main() {
-    // Set terminal to raw mode
     let original_term = set_raw_mode();
-
-    let stdin = 0;
-    let file = unsafe { File::from_raw_fd(stdin) };
-    let fd = file.as_raw_fd();
-
-    unsafe {
-        let flags = libc::fcntl(fd, libc::F_GETFL, 0);
-        libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
-    }
+    let file = set_non_blocking_stdin();
 
     // Clear the screen
     print!("\x1b[2J");
