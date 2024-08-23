@@ -67,10 +67,6 @@ fn get_console_size() -> (u16, u16) {
 }
 
 fn handle_input(mut state: GameState, mut file: &File) -> GameState {
-    if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
-        return state
-    }
-
     let mut buffer = [0; 3]; // Buffer to store input characters
 
     match file.read(&mut buffer) {
@@ -108,19 +104,28 @@ fn handle_input(mut state: GameState, mut file: &File) -> GameState {
 
 fn draw_snake(mut state: GameState) -> GameState {
     // If snake's head is at 0,0 then this is a new game, so put snake in the middle
-    if state.snake.positions[0].x == 0 || state.snake.positions[0].y == 0 {
+    if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
         let (cols, rows) = get_console_size();
         let middle_x = (cols + 1) / 2;
         let middle_y = (rows + 1) / 2;
 
-        state.snake.positions[0].x = middle_x;
-        state.snake.positions[0].y = middle_y;
+        state.snake.positions[0].x = middle_x as i16;
+        state.snake.positions[0].y = middle_y as i16;
 
         return state
     }
 
     let snake_head_pos = &state.snake.positions[0];
     print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
+
+    // Not sure where I'm going with this.
+    // match state.snake.direction {
+    //     Directions::Down => print!(" \x08"),
+    //     Directions::Up =>  print!("\x1b[0K"),
+    //     Directions::Left => print!(" "),
+    //     Directions::Right => print!("\x08 "),
+    //     _ => println!("║")
+    // };
 
     state.snake.step();
 
@@ -141,8 +146,8 @@ fn draw_snake(mut state: GameState) -> GameState {
 fn game_loop(file: File) {
     let mut state = GameState {
         snake: Snake {
-            positions: [Coords { x: 0, y: 0 }; 20],
-            direction: Directions::Up
+            positions: [Coords { x: -1, y: -1 }; 20],
+            direction: Directions::None
         },
     };
 

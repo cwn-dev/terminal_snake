@@ -31,6 +31,12 @@ impl Snake {
             _ => {}
         }
 
+        // for p in self.positions.iter() {
+        //     match p.x > -1 && p.y > -1 => 
+        // }
+
+        
+
         self
     }
 }
