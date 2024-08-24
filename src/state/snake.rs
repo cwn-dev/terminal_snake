@@ -59,6 +59,7 @@ impl Snake {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
