@@ -117,16 +117,31 @@ fn draw_snake(mut state: GameState) -> GameState {
 
     let snake_head_pos = &state.snake.positions[0];
     print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
+    
+    // Clear the old snake
+    for p in state.snake.positions.iter() {
+        print!("\x1b[{};{}f", p.y, p.x);
+        print!(" ");
+    }
 
     state.snake.step();
 
-    match state.snake.direction {
-        Directions::Down => println!("║"),
-        Directions::Up =>  println!("║"),
-        Directions::Left => println!("═"),
-        Directions::Right => println!("═"),
-        _ => println!("║")
-    };
+    // Draw the new snake
+    for p in state.snake.positions.iter() {
+        if p.x == -1 || p.y == -1 {
+            continue;
+        }
+
+        print!("\x1b[{};{}f", p.y, p.x);
+
+        match p.facing {
+            Directions::Down => println!("║"),
+            Directions::Up =>  println!("║"),
+            Directions::Left => println!("═"),
+            Directions::Right => println!("═"),
+            _ => println!("║")
+        }
+    }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
     //println!("{:?}", &state);

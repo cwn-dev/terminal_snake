@@ -26,6 +26,7 @@ impl Snake {
             // Grab the current head position and increment its position into new_positions.
             if i == 0 {
                 new_positions[0] = current_head;
+                new_positions[0].facing = self.direction;
 
                 match self.direction {
                     Directions::Up => new_positions[0].y -= 1,
@@ -51,6 +52,7 @@ impl Snake {
 
             new_positions[i].x = self.positions[i - 1].x;
             new_positions[i].y = self.positions[i - 1].y;
+            new_positions[i].facing = self.positions[i - 1].facing;
         }
 
         self.positions = new_positions;
@@ -62,6 +64,8 @@ impl Snake {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Todo: test steps + facing changes (turns)
 
     //
     // Tests a new, baby snake's forward steps.
@@ -103,6 +107,12 @@ mod tests {
         for i in 0..13 {
             snake.positions[i].x = 20;
             snake.positions[i].y = i as i16 + 10;
+        }
+
+        // All snake positions after 13 should be inactive.
+        for i in 13..snake.positions.len() {
+            assert_eq!(snake.positions[i].y, -1);
+            assert_eq!(snake.positions[i].x, -1);
         }
 
         snake.step();
