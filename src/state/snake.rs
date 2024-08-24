@@ -89,10 +89,10 @@ mod tests {
         }
     }
 
-    #[test]
     //
     // Tests a teenager (multiple blocks) snake's forward steps.
     //
+    #[test]
     fn teenager_snake_step_up() {
         let mut  snake = Snake { 
             positions: [Coords { x: -1, y: -1}; 20],
