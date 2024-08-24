@@ -1,6 +1,7 @@
 extern crate libc;
 
 use libc::{termios, TCSANOW, tcgetattr, tcsetattr, STDIN_FILENO, ioctl, winsize, TIOCGWINSZ};
+use state::coords::Coords;
 use std::io::Read;
 use std::mem;
 use std::thread;
@@ -11,7 +12,6 @@ use std::os::unix::io::FromRawFd;
 
 use state::gamestate::GameState;
 use state::directions::Directions;
-use state::coords::Coords;
 use state::snake::Snake;
 pub mod state;
 
@@ -118,15 +118,6 @@ fn draw_snake(mut state: GameState) -> GameState {
     let snake_head_pos = &state.snake.positions[0];
     print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
 
-    // Not sure where I'm going with this.
-    // match state.snake.direction {
-    //     Directions::Down => print!(" \x08"),
-    //     Directions::Up =>  print!("\x1b[0K"),
-    //     Directions::Left => print!(" "),
-    //     Directions::Right => print!("\x08 "),
-    //     _ => println!("║")
-    // };
-
     state.snake.step();
 
     match state.snake.direction {
@@ -146,7 +137,7 @@ fn draw_snake(mut state: GameState) -> GameState {
 fn game_loop(file: File) {
     let mut state = GameState {
         snake: Snake {
-            positions: [Coords { x: -1, y: -1 }; 20],
+            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::None
         },
     };

@@ -20,7 +20,7 @@ impl Snake {
     //
     pub fn step(&mut self) -> &mut Snake {
         let current_head = self.positions[0];
-        let mut new_positions: [Coords; 20] = [Coords { x: -1, y: -1 }; 20];
+        let mut new_positions: [Coords; 20] = [Coords { x: -1, y: -1, facing: Directions::None }; 20];
 
         for (i, c) in self.positions.iter().enumerate() {
             // Grab the current head position and increment its position into new_positions.
@@ -68,7 +68,7 @@ mod tests {
     #[test]
     fn baby_snake_step() {
         let mut  snake = Snake { 
-            positions: [Coords { x: -1, y: -1}; 20],
+            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::Up,
         };
 
@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn teenager_snake_step_up() {
         let mut  snake = Snake { 
-            positions: [Coords { x: -1, y: -1}; 20],
+            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::Up,
         };
 
