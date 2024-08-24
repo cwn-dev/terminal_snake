@@ -107,14 +107,20 @@ mod tests {
 
         snake.step();
 
-        // The head should have moved one step up
+        // The head should have moved one step up.
         assert_eq!(snake.positions[0].x, 20);
         assert_eq!(snake.positions[0].y, 9);
 
-        // Check that the elements in the array have effectively all shifted down 1
-        for i in 12..13 {
+        // Check that the elements in the array have effectively all shifted down 1.
+        for i in 2..13 {
             assert_eq!(snake.positions[i].x, 20);
             assert_eq!(snake.positions[i].y, i as i16 + 9);
+        }
+
+        // All snake positions after 13 should be inactive.
+        for i in 13..snake.positions.len() {
+            assert_eq!(snake.positions[i].y, -1);
+            assert_eq!(snake.positions[i].x, -1);
         }
 
     }
