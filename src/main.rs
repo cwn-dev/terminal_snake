@@ -1,55 +1,21 @@
 extern crate libc;
 
 use libc::{TCSANOW, tcsetattr, STDIN_FILENO};
-use state::coords::Coords;
-use terminal::terminal::Terminal;
-use std::io::Read;
 use std::thread;
 use std::time::Duration;
 use std::fs::File;
 
 use state::gamestate::GameState;
+use state::coords::Coords;
 use state::directions::Directions;
 use state::snake::Snake;
 
+use terminal::terminal::Terminal;
+use engine::inputhandler::InputHandler;
+
 pub mod state;
 pub mod terminal;
-
-fn handle_input(mut state: GameState, mut file: &File) -> GameState {
-    let mut buffer = [0; 3]; // Buffer to store input characters
-
-    match file.read(&mut buffer) {
-        Ok(0) => { 
-            state
-        },
-        Ok(_) => {
-            // Left Arrow
-            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x44 {
-                state.snake.direction = Directions::Left;
-            }
-
-            // Right Arrow
-            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x43 {
-                state.snake.direction = Directions::Right;
-            }
-
-            // Up Arrow
-            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x41 {        
-                state.snake.direction = Directions::Up;
-            }
-
-            // Down Arrow
-            if buffer[0] == 0x1B && buffer[1] == 0x5B && buffer[2] == 0x42 {
-                state.snake.direction = Directions::Down;
-            }
-
-            state
-        },
-        Err(_) => {
-            return state
-        }
-    }
-}
+pub mod engine;
 
 fn draw_snake(mut state: GameState) -> GameState {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
@@ -107,7 +73,7 @@ fn game_loop(file: File) {
     };
 
     loop {
-        state = handle_input(state, &file);
+        state = InputHandler::handle_input(state, &file);
         state = draw_snake(state);
 
         //thread::sleep(Duration::from_millis(16)); // about 60 fps
