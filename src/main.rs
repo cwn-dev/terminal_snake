@@ -1,70 +1,19 @@
 extern crate libc;
 
-use libc::{termios, TCSANOW, tcgetattr, tcsetattr, STDIN_FILENO, ioctl, winsize, TIOCGWINSZ};
+use libc::{TCSANOW, tcsetattr, STDIN_FILENO};
 use state::coords::Coords;
+use terminal::terminal::Terminal;
 use std::io::Read;
-use std::mem;
 use std::thread;
 use std::time::Duration;
 use std::fs::File;
-use std::os::unix::io::AsRawFd;
-use std::os::unix::io::FromRawFd;
 
 use state::gamestate::GameState;
 use state::directions::Directions;
 use state::snake::Snake;
+
 pub mod state;
-
-fn set_raw_mode() -> termios {
-    let mut term = unsafe { mem::zeroed::<termios>() };
-
-    // Get terminal attributes
-    unsafe {
-        tcgetattr(STDIN_FILENO, &mut term);
-    }
-
-    // Save original attributes for later restoration
-    let original_term = term;
-
-    // Set terminal to raw mode
-    term.c_lflag &= !(libc::ICANON | libc::ECHO); // Disable canonical mode and echo
-    term.c_cc[libc::VMIN] = 1; // Minimum number of characters to read
-    term.c_cc[libc::VTIME] = 0; // Timeout in deciseconds
-
-    unsafe {
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
-    }
-
-    original_term
-}
-
-fn set_non_blocking_stdin() -> File {
-    let stdin = 0;
-    let file = unsafe { File::from_raw_fd(stdin) };
-    let fd = file.as_raw_fd();
-
-    unsafe {
-        let flags = libc::fcntl(fd, libc::F_GETFL, 0);
-        libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
-    }
-
-    file
-}
-
-fn get_console_size() -> (u16, u16) {
-    let mut ws = winsize {
-        ws_row: 0,
-        ws_col: 0,
-        ws_xpixel: 0,
-        ws_ypixel: 0,
-    };
-
-    unsafe {
-        ioctl(STDIN_FILENO, TIOCGWINSZ, &mut ws);
-    }
-
-    (ws.ws_col as u16, ws.ws_row as u16)
-}
+pub mod terminal;
 
 fn handle_input(mut state: GameState, mut file: &File) -> GameState {
     let mut buffer = [0; 3]; // Buffer to store input characters
@@ -103,9 +52,9 @@ fn handle_input(mut state: GameState, mut file: &File) -> GameState {
 }
 
 fn draw_snake(mut state: GameState) -> GameState {
-    // If snake's head is at 0,0 then this is a new game, so put snake in the middle
+    // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
     if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
-        let (cols, rows) = get_console_size();
+        let (cols, rows) = Terminal::get_console_size();
         let middle_x = (cols + 1) / 2;
         let middle_y = (rows + 1) / 2;
 
@@ -167,8 +116,8 @@ fn game_loop(file: File) {
 }
 
 fn main() {
-    let original_term = set_raw_mode();
-    let file = set_non_blocking_stdin();
+    let original_term = Terminal::set_raw_mode();
+    let file = Terminal::set_non_blocking_stdin();
 
     // Clear the screen
     print!("\x1b[2J");
