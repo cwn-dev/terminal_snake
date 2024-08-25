@@ -16,6 +16,7 @@ use engine::inputhandler::InputHandler;
 pub mod state;
 pub mod terminal;
 pub mod engine;
+pub mod random;
 
 fn draw_snake(mut state: GameState) -> GameState {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
