@@ -30,9 +30,6 @@ fn draw_snake(mut state: GameState) -> GameState {
 
         return state
     }
-
-    let snake_head_pos = &state.snake.positions[0];
-    print!("\x1b[{};{}f", snake_head_pos.y, snake_head_pos.x);
     
     // Clear the old snake
     for p in state.snake.positions.iter() {
