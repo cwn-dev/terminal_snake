@@ -15,6 +15,9 @@ impl Random  {
         Random { seed }
     }
 
+    //
+    // Gets a new instance of `Random` with a seed of nanoseconds since `UNIX_EPOCH`.
+    //
     fn time_seed() -> Self {
         match SystemTime::now().duration_since(UNIX_EPOCH) {
             Ok(n) => Random::new(n.as_nanos()),
@@ -35,6 +38,9 @@ impl Random  {
         self.seed
     }
 
+    //
+    // Some modulo wizardry to effectively get an output from the LCG within a min/max range
+    //
     fn get(&mut self, min: u128, max: u128) -> u128 {
         min + (self.next() % (max - min + 1))
     }
