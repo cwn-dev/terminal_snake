@@ -22,6 +22,10 @@ impl Random  {
         }
     }
 
+    //
+    // The LCG algorithm
+    // https://en.wikipedia.org/wiki/Linear_congruential_generator
+    //
     fn next(&mut self) -> u128 {
         let a: u128 = 1664525;
         let c = 1013904223;
