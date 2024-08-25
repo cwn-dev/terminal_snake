@@ -6,6 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 pub struct Random {
+    // We used a u128 seed here as that's compatible with epoch as nanoseconds.
     seed: u128
 }
 
