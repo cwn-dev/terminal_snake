@@ -9,6 +9,13 @@ pub enum Directions {
 
 impl PartialEq for Directions {
     fn eq(&self, other: &Self) -> bool {
-        self == other
+        match (self, other) {
+            (Directions::None, Directions::None) => true,
+            (Directions::Down, Directions::Down) => true,
+            (Directions::Left, Directions::Left) => true,
+            (Directions::Right, Directions::Right) => true,
+            (Directions::Up, Directions::Up) => true,
+            _ => false,
+        }
     }
 }
