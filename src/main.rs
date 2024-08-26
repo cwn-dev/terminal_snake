@@ -1,6 +1,8 @@
 extern crate libc;
 
 use libc::{TCSANOW, tcsetattr, STDIN_FILENO};
+use random::random::Random;
+use std::io::Write;
 use std::thread;
 use std::time::Duration;
 use std::fs::File;
@@ -32,7 +34,14 @@ fn draw_snake(mut state: GameState) -> GameState {
     }
     
     // Clear the old snake
-    for p in state.snake.positions.iter() {
+    for (i, p) in state.snake.positions.iter().enumerate() {
+        // Clear all positions that don't have a facing or have and invalid position.
+        // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
+        // Todo: add an is_valid() to Coords so we don't have to keep repeating this.
+        if p.facing == Directions::None && (p.x == -1 || p.y == -1) && i > 0 {
+            continue;
+        }
+
         print!("\x1b[{};{}f", p.y, p.x);
         print!(" ");
     }
@@ -48,11 +57,16 @@ fn draw_snake(mut state: GameState) -> GameState {
         print!("\x1b[{};{}f", p.y, p.x);
 
         match p.facing {
-            Directions::Down => println!("║"),
-            Directions::Up =>  println!("║"),
-            Directions::Left => println!("═"),
-            Directions::Right => println!("═"),
-            _ => println!("║")
+            Directions::Down => print!("║"),
+            Directions::Up =>  print!("║"),
+            Directions::Left => print!("═"),
+            Directions::Right => print!("═"),
+            _ => print!("║")
+        }
+
+        match std::io::stdout().flush() {
+            Ok(_) => return state,
+            Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️")
         }
     }
 
@@ -62,7 +76,58 @@ fn draw_snake(mut state: GameState) -> GameState {
     state
 }
 
+fn draw_arena() {
+    let (cols, rows) = Terminal::get_console_size();
+
+    // Todo: we need some way of tracking where other blocks have been drawn on
+    // so we don't have to manually track stuff like this starting on row 3...
+
+    // Draw the corners
+    print!("\x1b[{};{}f", 3, cols - 1);        // top right
+    print!("╮");
+    print!("\x1b[{};{}f", rows - 1, cols - 1); // bottom right
+    print!("╯");
+    print!("\x1b[{};{}f", rows - 1, 1);        // bottom left
+    print!("╰");
+    print!("\x1b[{};{}f", 3, 1);               // top left
+    print!("╭");
+
+    // Draw the top line
+    for i in 2..cols - 1 {
+        print!("\x1b[{};{}f", 3, i);
+        print!("─");
+    }
+
+    // Draw the right line
+    for i in 4..rows - 1 {
+        print!("\x1b[{};{}f", i, cols - 1);
+        print!("│");
+    }
+
+    // Draw the bottom line
+    for i in 2..cols - 1 {
+        print!("\x1b[{};{}f", rows - 1, i);
+        print!("─");
+    }
+
+    // Draw the left line
+    for i in 4..rows - 1 {
+        print!("\x1b[{};{}f", i, 1);  
+        print!("│");
+    }
+}
+
+fn drawn_random_food() {
+    let (cols, rows) = Terminal::get_console_size();
+    let rand_cols = Random::time_seed().get(2, (cols - 3) as u128);
+    let rand_rows = Random::time_seed().get(4, (rows - 3) as u128);
+
+    print!("\x1b[{};{}f", rand_rows, rand_cols);  
+    print!("▫");
+}
+
 fn game_loop(file: File) {
+    // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState {
         snake: Snake {
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
@@ -75,7 +140,7 @@ fn game_loop(file: File) {
         state = draw_snake(state);
 
         //thread::sleep(Duration::from_millis(16)); // about 60 fps
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_millis(200));
     }
 }
 
@@ -94,7 +159,11 @@ fn main() {
 
     println!("Welcome to terminal_snake");
     println!("Press any key to start");
-    
+
+    // Todo: get the current console size and store it in the game state.
+
+    draw_arena();
+    drawn_random_food();
     game_loop(file);
 
     // Restore original terminal settings
