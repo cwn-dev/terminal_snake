@@ -217,6 +217,9 @@ mod tests {
 
         assert_eq!(snake.positions[1].x, 10);
         assert_eq!(snake.positions[1].y, 11);
+
+        assert_eq!(snake.positions[2].x, -1);
+        assert_eq!(snake.positions[2].y, -1);
     }
 
     //
@@ -231,6 +234,9 @@ mod tests {
 
         assert_eq!(snake.positions[1].x, 10);
         assert_eq!(snake.positions[1].y, 9);
+
+        assert_eq!(snake.positions[2].x, -1);
+        assert_eq!(snake.positions[2].y, -1);
     }
 
     //
@@ -245,6 +251,9 @@ mod tests {
 
         assert_eq!(snake.positions[1].x, 11);
         assert_eq!(snake.positions[1].y, 10);
+
+        assert_eq!(snake.positions[2].x, -1);
+        assert_eq!(snake.positions[2].y, -1);
     }
 
     //
@@ -259,6 +268,9 @@ mod tests {
 
         assert_eq!(snake.positions[1].x, 9);
         assert_eq!(snake.positions[1].y, 10);
+
+        assert_eq!(snake.positions[2].x, -1);
+        assert_eq!(snake.positions[2].y, -1);
     }
 
     #[test]
@@ -285,5 +297,8 @@ mod tests {
 
         assert_eq!(snake.positions[6].x, 4);
         assert_eq!(snake.positions[6].y, 10);
+
+        assert_eq!(snake.positions[7].x, -1);
+        assert_eq!(snake.positions[7].y, -1);
     }
 }
