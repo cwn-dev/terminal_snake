@@ -4,6 +4,10 @@ use super::directions::Directions;
 #[derive(Debug)]
 pub struct Snake {
     // The position of each block making up the body of snake
+    // Todo: this should not be a set size. When launching the
+    // game, or eating, we need to create a new array the size
+    // the snake is going to be, populate that, then use that as
+    // the snake.
     pub positions: [Coords; 20],
 
     // Holds the direction snake's head is currently facing
@@ -59,6 +63,56 @@ impl Snake {
 
         self
     }
+
+    //
+    // Grow snake by the given number of blocks (amount).
+    // Todo: when Snake grows, really he should grow the positions array. Currently it's fixed.
+    //
+    pub fn grow(&mut self, amount: usize) -> &mut Snake {
+        let mut positions = self.positions;
+
+        for (i, p) in self.positions.iter().enumerate() { // todo: look into iter().enumerate()
+            // Only continue if the previous x & y had values but the current does not.
+            // This means we are at the tail.
+            if p.x == -1 || p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1 {
+                for j in 0..amount {                
+                    // Read the values of the tail so we know what the oritentation should be
+                    // for the new one.
+                    let previous_tail = positions[(j + 1) - 1];
+
+                    let mut new_position = Coords { x: 1, y: 1, facing: previous_tail.facing };
+
+                    match previous_tail.facing {
+                        Directions::Up => {
+                            new_position.x = previous_tail.x;
+                            new_position.y = previous_tail.y + 1;
+                        },
+                        Directions::Down => {
+                            new_position.x = previous_tail.x;
+                            new_position.y = previous_tail.y - 1;
+                        },
+                        Directions::Left => {
+                            new_position.x = previous_tail.x + 1;
+                            new_position.y = previous_tail.y;
+                        },
+                        Directions::Right => {
+                            new_position.x = previous_tail.x - 1;
+                            new_position.y = previous_tail.y;
+                        },
+                        Directions::None => {}
+                    }
+                    
+                    positions[j + i] = new_position;
+                }
+
+                break;
+            }
+        }
+
+        self.positions = positions;
+
+        self
+    }
 }
 
 #[cfg(test)]
@@ -99,7 +153,7 @@ mod tests {
     //
     #[test]
     fn teenager_snake_step_up() {
-        let mut  snake = Snake { 
+        let mut snake = Snake { 
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::Up,
         };
@@ -131,7 +185,105 @@ mod tests {
         for i in 13..snake.positions.len() {
             assert_eq!(snake.positions[i].y, -1);
             assert_eq!(snake.positions[i].x, -1);
-        }
+        }        
+    }
 
+    //
+    // Set up a snake and grow it a single block.
+    //
+    fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
+        let mut snake = Snake { 
+            positions: [Coords { x: -1, y: -1, facing: direction }; 20],
+            direction: direction,
+        };
+
+        snake.positions[0].x = 10;
+        snake.positions[0].y = 10;
+
+        snake.grow(grow_by);
+
+        snake
+    }
+
+    //
+    // Check new snake position is in the right place when tail is facing up.
+    //
+    #[test]
+    fn grow_amount_1_should_add_new_block_direction_up() {
+        let snake = set_snake_and_grow(Directions::Up, 1);
+
+        assert_eq!(snake.positions[0].x, 10);
+        assert_eq!(snake.positions[0].y, 10);
+
+        assert_eq!(snake.positions[1].x, 10);
+        assert_eq!(snake.positions[1].y, 11);
+    }
+
+    //
+    // Check new snake position is in the right place when tail is facing down.
+    //
+    #[test]
+    fn grow_amount_1_should_add_new_block_direction_down() {
+        let snake = set_snake_and_grow(Directions::Down, 1);
+
+        assert_eq!(snake.positions[0].x, 10);
+        assert_eq!(snake.positions[0].y, 10);
+
+        assert_eq!(snake.positions[1].x, 10);
+        assert_eq!(snake.positions[1].y, 9);
+    }
+
+    //
+    // Check new snake position is in the right place when tail is facing left.
+    //
+    #[test]
+    fn grow_amount_1_should_add_new_block_direction_left() {
+        let snake = set_snake_and_grow(Directions::Left, 1);
+
+        assert_eq!(snake.positions[0].x, 10);
+        assert_eq!(snake.positions[0].y, 10);
+
+        assert_eq!(snake.positions[1].x, 11);
+        assert_eq!(snake.positions[1].y, 10);
+    }
+
+    //
+    // Check new snake position is in the right place when tail is facing right.
+    //
+    #[test]
+    fn grow_amount_1_should_add_new_block_direction_right() {
+        let snake = set_snake_and_grow(Directions::Right, 1);
+
+        assert_eq!(snake.positions[0].x, 10);
+        assert_eq!(snake.positions[0].y, 10);
+
+        assert_eq!(snake.positions[1].x, 9);
+        assert_eq!(snake.positions[1].y, 10);
+    }
+
+    #[test]
+    fn grow_amount_6_should_add_new_block_direction_right() {
+        let snake = set_snake_and_grow(Directions::Right, 6);
+
+        assert_eq!(snake.positions[0].x, 10);
+        assert_eq!(snake.positions[0].y, 10);
+
+        assert_eq!(snake.positions[1].x, 9);
+        assert_eq!(snake.positions[1].y, 10);
+
+        assert_eq!(snake.positions[2].x, 8);
+        assert_eq!(snake.positions[2].y, 10);
+
+        assert_eq!(snake.positions[3].x, 7);
+        assert_eq!(snake.positions[4].y, 10);
+
+        assert_eq!(snake.positions[4].x, 6);
+        assert_eq!(snake.positions[4].y, 10);
+
+        assert_eq!(snake.positions[5].x, 5);
+        assert_eq!(snake.positions[5].y, 10);
+
+        assert_eq!(snake.positions[6].x, 4);
+        assert_eq!(snake.positions[6].y, 10);
     }
 }
