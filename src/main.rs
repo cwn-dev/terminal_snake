@@ -1,6 +1,6 @@
 extern crate libc;
 
-use libc::{TCSANOW, tcsetattr, STDIN_FILENO};
+use libc::{ TCSANOW, tcsetattr, STDIN_FILENO };
 use random::random::Random;
 use std::io::Write;
 use std::thread;
@@ -30,9 +30,9 @@ fn draw_snake(mut state: GameState) -> GameState {
         state.snake.positions[0].x = middle_x as i16;
         state.snake.positions[0].y = middle_y as i16;
 
-        return state
+        return state;
     }
-    
+
     // Clear the old snake
     for (i, p) in state.snake.positions.iter().enumerate() {
         // Clear all positions that don't have a facing or have and invalid position.
@@ -58,15 +58,17 @@ fn draw_snake(mut state: GameState) -> GameState {
 
         match p.facing {
             Directions::Down => print!("║"),
-            Directions::Up =>  print!("║"),
+            Directions::Up => print!("║"),
             Directions::Left => print!("═"),
             Directions::Right => print!("═"),
-            _ => print!("║")
+            _ => print!("║"),
         }
 
         match std::io::stdout().flush() {
-            Ok(_) => return state,
-            Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️")
+            Ok(_) => {
+                return state;
+            }
+            Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️"),
         }
     }
 
@@ -83,13 +85,13 @@ fn draw_arena() {
     // so we don't have to manually track stuff like this starting on row 3...
 
     // Draw the corners
-    print!("\x1b[{};{}f", 3, cols - 1);        // top right
+    print!("\x1b[{};{}f", 3, cols - 1); // top right
     print!("╮");
     print!("\x1b[{};{}f", rows - 1, cols - 1); // bottom right
     print!("╯");
-    print!("\x1b[{};{}f", rows - 1, 1);        // bottom left
+    print!("\x1b[{};{}f", rows - 1, 1); // bottom left
     print!("╰");
-    print!("\x1b[{};{}f", 3, 1);               // top left
+    print!("\x1b[{};{}f", 3, 1); // top left
     print!("╭");
 
     // Draw the top line
@@ -112,7 +114,7 @@ fn draw_arena() {
 
     // Draw the left line
     for i in 4..rows - 1 {
-        print!("\x1b[{};{}f", i, 1);  
+        print!("\x1b[{};{}f", i, 1);
         print!("│");
     }
 }
@@ -122,7 +124,7 @@ fn drawn_random_food() {
     let rand_cols = Random::time_seed().get(2, (cols - 3) as u128);
     let rand_rows = Random::time_seed().get(4, (rows - 3) as u128);
 
-    print!("\x1b[{};{}f", rand_rows, rand_cols);  
+    print!("\x1b[{};{}f", rand_rows, rand_cols);
     print!("▫");
 }
 
@@ -131,7 +133,7 @@ fn game_loop(file: File) {
     let mut state = GameState {
         snake: Snake {
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
-            direction: Directions::None
+            direction: Directions::None,
         },
     };
 

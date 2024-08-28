@@ -24,7 +24,10 @@ impl Snake {
     //
     pub fn step(&mut self) -> &mut Snake {
         let current_head = self.positions[0];
-        let mut new_positions: [Coords; 20] = [Coords { x: -1, y: -1, facing: Directions::None }; 20];
+        let mut new_positions: [Coords; 20] = [
+            Coords { x: -1, y: -1, facing: Directions::None };
+            20
+        ];
 
         for (i, c) in self.positions.iter().enumerate() {
             // Grab the current head position and increment its position into new_positions.
@@ -33,13 +36,21 @@ impl Snake {
                 new_positions[0].facing = self.direction;
 
                 match self.direction {
-                    Directions::Up => new_positions[0].y -= 1,
-                    Directions::Down => new_positions[0].y += 1,
-                    Directions::Left => new_positions[0].x -= 1,
-                    Directions::Right => new_positions[0].x += 1,
+                    Directions::Up => {
+                        new_positions[0].y -= 1;
+                    }
+                    Directions::Down => {
+                        new_positions[0].y += 1;
+                    }
+                    Directions::Left => {
+                        new_positions[0].x -= 1;
+                    }
+                    Directions::Right => {
+                        new_positions[0].x += 1;
+                    }
                     _ => {}
                 }
-                
+
                 continue;
             }
 
@@ -71,14 +82,15 @@ impl Snake {
     pub fn grow(&mut self, amount: usize) -> &mut Snake {
         let mut positions = self.positions;
 
-        for (i, p) in self.positions.iter().enumerate() { // todo: look into iter().enumerate()
+        for (i, p) in self.positions.iter().enumerate() {
+            // todo: look into iter().enumerate()
             // Only continue if the previous x & y had values but the current does not.
             // This means we are at the tail.
-            if p.x == -1 || p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1 {
-                for j in 0..amount {                
+            if p.x == -1 || (p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1) {
+                for j in 0..amount {
                     // Read the values of the tail so we know what the oritentation should be
                     // for the new one.
-                    let previous_tail = positions[(j + 1) - 1];
+                    let previous_tail = positions[j + 1 - 1];
 
                     let mut new_position = Coords { x: 1, y: 1, facing: previous_tail.facing };
 
@@ -86,22 +98,22 @@ impl Snake {
                         Directions::Up => {
                             new_position.x = previous_tail.x;
                             new_position.y = previous_tail.y + 1;
-                        },
+                        }
                         Directions::Down => {
                             new_position.x = previous_tail.x;
                             new_position.y = previous_tail.y - 1;
-                        },
+                        }
                         Directions::Left => {
                             new_position.x = previous_tail.x + 1;
                             new_position.y = previous_tail.y;
-                        },
+                        }
                         Directions::Right => {
                             new_position.x = previous_tail.x - 1;
                             new_position.y = previous_tail.y;
-                        },
+                        }
                         Directions::None => {}
                     }
-                    
+
                     positions[j + i] = new_position;
                 }
 
@@ -126,7 +138,7 @@ mod tests {
     //
     #[test]
     fn baby_snake_step() {
-        let mut  snake = Snake { 
+        let mut snake = Snake {
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::Up,
         };
@@ -140,7 +152,7 @@ mod tests {
         // Move is Up, which means up one line and so y decreases.
         assert_eq!(snake.positions[0].x, 5);
         assert_eq!(snake.positions[0].y, 4);
-        
+
         // The rest of the body should be inactive.
         for i in 2..snake.positions.len() {
             assert_eq!(snake.positions[i].x, -1);
@@ -153,14 +165,14 @@ mod tests {
     //
     #[test]
     fn teenager_snake_step_up() {
-        let mut snake = Snake { 
+        let mut snake = Snake {
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::Up,
         };
 
         for i in 0..13 {
             snake.positions[i].x = 20;
-            snake.positions[i].y = i as i16 + 10;
+            snake.positions[i].y = (i as i16) + 10;
         }
 
         // All snake positions after 13 should be inactive.
@@ -178,21 +190,21 @@ mod tests {
         // Check that the elements in the array have effectively all shifted down 1.
         for i in 2..13 {
             assert_eq!(snake.positions[i].x, 20);
-            assert_eq!(snake.positions[i].y, i as i16 + 9);
+            assert_eq!(snake.positions[i].y, (i as i16) + 9);
         }
 
         // All snake positions after 13 should be inactive.
         for i in 13..snake.positions.len() {
             assert_eq!(snake.positions[i].y, -1);
             assert_eq!(snake.positions[i].x, -1);
-        }        
+        }
     }
 
     //
     // Set up a snake and grow it a single block.
     //
     fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
-        let mut snake = Snake { 
+        let mut snake = Snake {
             positions: [Coords { x: -1, y: -1, facing: direction }; 20],
             direction: direction,
         };

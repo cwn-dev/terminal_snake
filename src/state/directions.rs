@@ -4,7 +4,7 @@ pub enum Directions {
     Up,
     Down,
     Right,
-    Left
+    Left,
 }
 
 impl PartialEq for Directions {

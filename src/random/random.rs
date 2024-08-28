@@ -2,15 +2,15 @@
 // Linear congruential generator (LCG) aka Snake Food.
 //
 
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{ SystemTime, UNIX_EPOCH };
 
 #[derive(Debug)]
 pub struct Random {
     // We used a u128 seed here as that's compatible with epoch as nanoseconds.
-    seed: u128
+    seed: u128,
 }
 
-impl Random  {
+impl Random {
     fn new(seed: u128) -> Self {
         Random { seed }
     }
@@ -34,7 +34,7 @@ impl Random  {
         let c = 1013904223;
         let m = u128::MAX;
 
-        self.seed = (a.wrapping_mul(self.seed).wrapping_add(c)) % m;
+        self.seed = a.wrapping_mul(self.seed).wrapping_add(c) % m;
         self.seed
     }
 
@@ -61,7 +61,7 @@ mod tests {
         assert_eq!(r2, 1804036966669548);
         assert_eq!(r3, 3002864631946643288923);
     }
-    
+
     //
     // Look, my RNG is so good, I can unit test it.
     //
