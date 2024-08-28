@@ -4,5 +4,9 @@
 			"path": ".."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"[rust]": {
+			"editor.defaultFormatter": "jinxdash.prettier-rust"
+		}
+	}
 }
