@@ -2,16 +2,13 @@ extern crate libc;
 
 use libc::{ TCSANOW, tcsetattr, STDIN_FILENO };
 use random::random::Random;
-use state::food::Food;
 use std::io::Write;
 use std::thread;
 use std::time::Duration;
 use std::fs::File;
 
 use state::gamestate::GameState;
-use state::coords::Coords;
 use state::directions::Directions;
-use state::snake::Snake;
 
 use terminal::terminal::Terminal;
 use engine::inputhandler::InputHandler;
@@ -141,24 +138,23 @@ fn drawn_random_food(mut state: GameState) -> GameState {
     state
 }
 
+fn draw_score(state: &GameState) {
+    let (cols, _) = Terminal::get_console_size();
+
+    print!("\x1b[{};{}f", 2, cols - 1);
+    print!("{}", state.score);
+}
+
 fn game_loop(file: File) {
     // Todo: move this out of game_loop and put into init() or main().
-    let mut state = GameState {
-        score: 0,
-        snake: Snake {
-            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
-            direction: Directions::None,
-        },
-        food: Food {
-            positions: [(-1, -1); 3],
-        },
-    };
+    let mut state = GameState::new();
 
     state = drawn_random_food(state);
 
     loop {
         state = InputHandler::handle_input(state, &file);
         state = draw_snake(state);
+        draw_score(&state);
 
         //thread::sleep(Duration::from_millis(16)); // about 60 fps
         thread::sleep(Duration::from_millis(200));
