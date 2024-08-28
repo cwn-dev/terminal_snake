@@ -2,6 +2,7 @@ extern crate libc;
 
 use libc::{ TCSANOW, tcsetattr, STDIN_FILENO };
 use random::random::Random;
+use state::food::Food;
 use std::io::Write;
 use std::thread;
 use std::time::Duration;
@@ -52,6 +53,14 @@ fn draw_snake(mut state: GameState) -> GameState {
     for p in state.snake.positions.iter() {
         if p.x == -1 || p.y == -1 {
             continue;
+        }
+
+        // Did we eat something?
+        match state.food.positions.iter().find(|&&x| x == (p.x, p.y)) {
+            Some(_) => {
+                state.score += 1;
+            }
+            None => (),
         }
 
         print!("\x1b[{};{}f", p.y, p.x);
@@ -119,23 +128,33 @@ fn draw_arena() {
     }
 }
 
-fn drawn_random_food() {
+fn drawn_random_food(mut state: GameState) -> GameState {
     let (cols, rows) = Terminal::get_console_size();
     let rand_cols = Random::time_seed().get(2, (cols - 3) as u128);
     let rand_rows = Random::time_seed().get(4, (rows - 3) as u128);
 
+    state.food.positions[0] = (rand_cols as i16, rand_rows as i16);
+
     print!("\x1b[{};{}f", rand_rows, rand_cols);
     print!("▫");
+
+    state
 }
 
 fn game_loop(file: File) {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState {
+        score: 0,
         snake: Snake {
             positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
             direction: Directions::None,
         },
+        food: Food {
+            positions: [(-1, -1); 3],
+        },
     };
+
+    state = drawn_random_food(state);
 
     loop {
         state = InputHandler::handle_input(state, &file);
@@ -165,7 +184,6 @@ fn main() {
     // Todo: get the current console size and store it in the game state.
 
     draw_arena();
-    drawn_random_food();
     game_loop(file);
 
     // Restore original terminal settings
