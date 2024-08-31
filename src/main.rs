@@ -79,6 +79,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     }
 
     if snake_eaten {
+        state.snake.grow(1);
         state = drawn_random_food(state);
     }
 
@@ -86,7 +87,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
         Ok(_) => {
             return Ok(state);
         }
-        Err(e) => Err(SnakeError),
+        Err(_) => Err(SnakeError),
     }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
@@ -189,7 +190,10 @@ fn main() {
     // Todo: get the current console size and store it in the game state.
 
     draw_arena();
-    game_loop(file);
+    match game_loop(file) {
+        Ok(_) => println!("Test"),
+        Err(_) => {}
+    }
 
     // Restore original terminal settings
     unsafe {
