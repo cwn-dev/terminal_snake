@@ -2,7 +2,7 @@
 // Linear congruential generator (LCG) aka Snake Food.
 //
 
-use std::time::{ SystemTime, UNIX_EPOCH };
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 pub struct Random {

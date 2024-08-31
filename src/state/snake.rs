@@ -24,10 +24,11 @@ impl Snake {
     //
     pub fn step(&mut self) -> &mut Snake {
         let current_head = self.positions[0];
-        let mut new_positions: [Coords; 20] = [
-            Coords { x: -1, y: -1, facing: Directions::None };
-            20
-        ];
+        let mut new_positions: [Coords; 20] = [Coords {
+            x: -1,
+            y: -1,
+            facing: Directions::None,
+        }; 20];
 
         for (i, c) in self.positions.iter().enumerate() {
             // Grab the current head position and increment its position into new_positions.
@@ -86,7 +87,11 @@ impl Snake {
                     // for the new one.
                     let previous_tail = positions[j + 1 - 1];
 
-                    let mut new_position = Coords { x: 1, y: 1, facing: previous_tail.facing };
+                    let mut new_position = Coords {
+                        x: 1,
+                        y: 1,
+                        facing: previous_tail.facing,
+                    };
 
                     match previous_tail.facing {
                         Directions::Up => {
@@ -133,7 +138,11 @@ mod tests {
     #[test]
     fn baby_snake_step() {
         let mut snake = Snake {
-            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
+            positions: [Coords {
+                x: -1,
+                y: -1,
+                facing: Directions::None,
+            }; 20],
             direction: Directions::Up,
         };
 
@@ -160,7 +169,11 @@ mod tests {
     #[test]
     fn teenager_snake_step_up() {
         let mut snake = Snake {
-            positions: [Coords { x: -1, y: -1, facing: Directions::None }; 20],
+            positions: [Coords {
+                x: -1,
+                y: -1,
+                facing: Directions::None,
+            }; 20],
             direction: Directions::Up,
         };
 
@@ -199,7 +212,11 @@ mod tests {
     //
     fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
         let mut snake = Snake {
-            positions: [Coords { x: -1, y: -1, facing: direction }; 20],
+            positions: [Coords {
+                x: -1,
+                y: -1,
+                facing: direction,
+            }; 20],
             direction: direction,
         };
 

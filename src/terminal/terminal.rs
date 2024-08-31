@@ -1,6 +1,6 @@
-use libc::{ termios, TCSANOW, tcgetattr, tcsetattr, STDIN_FILENO, ioctl, winsize, TIOCGWINSZ };
-use std::mem;
+use libc::{ioctl, tcgetattr, tcsetattr, termios, winsize, STDIN_FILENO, TCSANOW, TIOCGWINSZ};
 use std::fs::File;
+use std::mem;
 use std::os::unix::io::AsRawFd;
 use std::os::unix::io::FromRawFd;
 

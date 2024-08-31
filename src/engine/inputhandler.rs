@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::Read;
 
-use crate::GameState;
 use crate::Directions;
+use crate::GameState;
 
 pub struct InputHandler {}
 
@@ -11,7 +11,7 @@ impl InputHandler {
         let mut buffer = [0; 3]; // Buffer to store input characters
 
         match file.read(&mut buffer) {
-            Ok(0) => { state }
+            Ok(0) => state,
             Ok(_) => {
                 // Left Arrow
                 if buffer[0] == 0x1b && buffer[1] == 0x5b && buffer[2] == 0x44 {

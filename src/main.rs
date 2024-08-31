@@ -1,24 +1,24 @@
 extern crate libc;
 
-use libc::{ TCSANOW, tcsetattr, STDIN_FILENO };
+use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
 use random::random::Random;
+use std::fs::File;
 use std::io::Write;
 use std::thread;
 use std::time::Duration;
-use std::fs::File;
 
-use state::gamestate::GameState;
 use state::directions::Directions;
+use state::gamestate::GameState;
 
+use engine::inputhandler::InputHandler;
 use error::SnakeError;
 use terminal::terminal::Terminal;
-use engine::inputhandler::InputHandler;
 
+pub mod engine;
+pub mod error;
+pub mod random;
 pub mod state;
 pub mod terminal;
-pub mod engine;
-pub mod random;
-pub mod error;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
