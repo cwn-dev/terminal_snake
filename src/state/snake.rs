@@ -59,12 +59,6 @@ impl Snake {
                 continue;
             }
 
-            // Is this the last piece of the active current snake? Throw it away
-            // if c.x == -1 && c.y == -1 && self.positions[i - 1].x != -1 && self.positions[i - 1].y != -1
-            // {
-            //     break;
-            // }
-
             new_positions[i].x = self.positions[i - 1].x;
             new_positions[i].y = self.positions[i - 1].y;
             new_positions[i].facing = self.positions[i - 1].facing;
