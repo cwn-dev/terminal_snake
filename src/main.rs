@@ -10,6 +10,7 @@ use std::fs::File;
 use state::gamestate::GameState;
 use state::directions::Directions;
 
+use error::SnakeError;
 use terminal::terminal::Terminal;
 use engine::inputhandler::InputHandler;
 
@@ -17,8 +18,9 @@ pub mod state;
 pub mod terminal;
 pub mod engine;
 pub mod random;
+pub mod error;
 
-fn draw_snake(mut state: GameState) -> GameState {
+fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
     if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
         let (cols, rows) = Terminal::get_console_size();
@@ -28,7 +30,7 @@ fn draw_snake(mut state: GameState) -> GameState {
         state.snake.positions[0].x = middle_x as i16;
         state.snake.positions[0].y = middle_y as i16;
 
-        return state;
+        return Ok(state);
     }
 
     // Clear the old snake
@@ -82,9 +84,9 @@ fn draw_snake(mut state: GameState) -> GameState {
 
     match std::io::stdout().flush() {
         Ok(_) => {
-            return state;
+            return Ok(state);
         }
-        Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️"),
+        Err(e) => Err(SnakeError),
     }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
@@ -152,7 +154,7 @@ fn draw_score(state: &GameState) {
     print!("{}", state.score);
 }
 
-fn game_loop(file: File) {
+fn game_loop(file: File) -> Result<(), SnakeError> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
 
@@ -160,7 +162,7 @@ fn game_loop(file: File) {
 
     loop {
         state = InputHandler::handle_input(state, &file);
-        state = draw_snake(state);
+        state = draw_snake(state)?;
         draw_score(&state);
 
         //thread::sleep(Duration::from_millis(16)); // about 60 fps
