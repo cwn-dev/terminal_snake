@@ -45,6 +45,7 @@ fn draw_snake(mut state: GameState) -> GameState {
     }
 
     state.snake.step();
+    let mut snake_eaten = false;
 
     // Draw the new snake
     for p in state.snake.positions.iter() {
@@ -56,6 +57,10 @@ fn draw_snake(mut state: GameState) -> GameState {
         match state.food.positions.iter().find(|&&x| x == (p.x, p.y)) {
             Some(_) => {
                 state.score += 1;
+
+                if !snake_eaten {
+                    snake_eaten = true;
+                }
             }
             None => (),
         }
@@ -69,19 +74,21 @@ fn draw_snake(mut state: GameState) -> GameState {
             Directions::Right => print!("═"),
             _ => print!("║"),
         }
+    }
 
-        match std::io::stdout().flush() {
-            Ok(_) => {
-                return state;
-            }
-            Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️"),
+    if snake_eaten {
+        state = drawn_random_food(state);
+    }
+
+    match std::io::stdout().flush() {
+        Ok(_) => {
+            return state;
         }
+        Err(_) => panic!("Umm, stdout() failed I think 🤷‍♂️"),
     }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
     //println!("{:?}", &state);
-
-    state
 }
 
 fn draw_arena() {
