@@ -55,6 +55,6 @@ impl Terminal {
             ioctl(STDIN_FILENO, TIOCGWINSZ, &mut ws);
         }
 
-        (ws.ws_col as u16, ws.ws_row as u16)
+        (ws.ws_col, ws.ws_row)
     }
 }

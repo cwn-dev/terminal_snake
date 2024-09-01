@@ -15,7 +15,7 @@ pub struct Snake {
 }
 
 impl Snake {
-    pub fn default() -> Self {
+    pub fn new() -> Self {
         Snake {
             positions: [Coords {
                 x: -1,
@@ -24,10 +24,6 @@ impl Snake {
             }; 20],
             direction: Directions::None,
         }
-    }
-
-    pub fn new() -> Self {
-        Snake::default()
     }
 
     //
@@ -138,6 +134,12 @@ impl Snake {
         self.positions = positions;
 
         self
+    }
+}
+
+impl Default for Snake {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -60,15 +60,12 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
         }
 
         // Did we eat something?
-        match state.food.positions.iter().find(|&&x| x == (p.x, p.y)) {
-            Some(_) => {
-                state.score += 1;
+        if state.food.positions.iter().any(|&x| x == (p.x, p.y)) {
+            state.score += 1;
 
-                if !snake_eaten {
-                    snake_eaten = true;
-                }
+            if !snake_eaten {
+                snake_eaten = true;
             }
-            None => (),
         }
 
         print!("\x1b[{};{}f", p.y, p.x);
@@ -110,7 +107,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
 
     match std::io::stdout().flush() {
         Ok(_) => {
-            return Ok(state);
+            Ok(state)
         }
         Err(_) => Err(SnakeError),
     }
@@ -202,9 +199,9 @@ fn main() {
     // Todo: get the current console size and store it in the game state.
 
     draw_arena();
-    match game_loop(file) {
-        Ok(_) => println!("Test"),
-        Err(_) => {}
+
+    if game_loop(file).is_ok() {
+        print!("Game loop finished");
     }
 
     // Restore original terminal settings
