@@ -1,7 +1,6 @@
 extern crate libc;
 
 use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
-use state::coords::Coords;
 use state::food::Food;
 use std::fs::File;
 use std::io::Write;
@@ -75,34 +74,32 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
         print!("\x1b[{};{}f", p.y, p.x);
 
         let previous_block_facing = match i {
-            0 => &p.facing,
             1.. => &state.snake.positions[i - 1].facing,
+            _ => &p.facing,
         };
 
-        if &p.facing != previous_block_facing {
-            match (previous_block_facing, &p.facing) {
-                (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
-                    print!("╔");
-                }
-                (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
-                    print!("╚");
-                }
-                (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
-                    print!("╗")
-                }
-                (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
-                    print!("╝")
-                }
-                _ => print!("║"),
+        // Draw the current block depending on the previous facing
+        // vs. the current facing.  Draw corner pieces etc. accordingly.
+        match (previous_block_facing, &p.facing) {
+            (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
+                print!("╔");
             }
-        } else {
-            match p.facing {
-                Directions::Down => print!("║"),
-                Directions::Up => print!("║"),
-                Directions::Left => print!("═"),
-                Directions::Right => print!("═"),
-                _ => print!("║"),
+            (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
+                print!("╚");
             }
+            (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
+                print!("╗")
+            }
+            (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
+                print!("╝")
+            }
+            (Directions::Down, Directions::Down) | (Directions::Up, Directions::Up) => {
+                print!("║")
+            }
+            (Directions::Left, Directions::Left) | (Directions::Right, Directions::Right) => {
+                print!("═")
+            }
+            _ => print!("║"),
         }
     }
 
