@@ -1,6 +1,6 @@
 extern crate libc;
 
-use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
+use libc::{ tcsetattr, STDIN_FILENO, TCSANOW };
 use random::random::Random;
 use std::fs::File;
 use std::io::Write;

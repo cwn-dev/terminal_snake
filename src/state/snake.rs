@@ -24,11 +24,14 @@ impl Snake {
     //
     pub fn step(&mut self) -> &mut Snake {
         let current_head = self.positions[0];
-        let mut new_positions: [Coords; 20] = [Coords {
-            x: -1,
-            y: -1,
-            facing: Directions::None,
-        }; 20];
+        let mut new_positions: [Coords; 20] = [
+            Coords {
+                x: -1,
+                y: -1,
+                facing: Directions::None,
+            };
+            20
+        ];
 
         for (i, c) in self.positions.iter().enumerate() {
             // Grab the current head position and increment its position into new_positions.
@@ -81,7 +84,7 @@ impl Snake {
             // todo: look into iter().enumerate()
             // Only continue if the previous x & y had values but the current does not.
             // This means we are at the tail.
-            if p.x == -1 || (p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1) {
+            if p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1 {
                 for j in 0..amount {
                     // Read the values of the tail so we know what the oritentation should be
                     // for the new one.
@@ -138,11 +141,14 @@ mod tests {
     #[test]
     fn baby_snake_step() {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: Directions::None,
-            }; 20],
+            positions: [
+                Coords {
+                    x: -1,
+                    y: -1,
+                    facing: Directions::None,
+                };
+                20
+            ],
             direction: Directions::Up,
         };
 
@@ -169,11 +175,14 @@ mod tests {
     #[test]
     fn teenager_snake_step_up() {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: Directions::None,
-            }; 20],
+            positions: [
+                Coords {
+                    x: -1,
+                    y: -1,
+                    facing: Directions::None,
+                };
+                20
+            ],
             direction: Directions::Up,
         };
 
@@ -212,11 +221,14 @@ mod tests {
     //
     fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: direction,
-            }; 20],
+            positions: [
+                Coords {
+                    x: -1,
+                    y: -1,
+                    facing: direction,
+                };
+                20
+            ],
             direction: direction,
         };
 
