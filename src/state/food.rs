@@ -1,4 +1,4 @@
-use crate::{ error::SnakeError, random::random::Random, terminal::terminal::Terminal };
+use crate::{error::SnakeError, random::random::Random, terminal::terminal::Terminal};
 
 use super::gamestate::GameState;
 
