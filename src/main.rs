@@ -1,6 +1,7 @@
 extern crate libc;
 
-use libc::{ tcsetattr, STDIN_FILENO, TCSANOW };
+use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
+use state::coords::Coords;
 use state::food::Food;
 use std::fs::File;
 use std::io::Write;
@@ -54,7 +55,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     let mut snake_eaten = false;
 
     // Draw the new snake
-    for p in state.snake.positions.iter() {
+    for (i, p) in state.snake.positions.iter().enumerate() {
         if p.x == -1 || p.y == -1 {
             continue;
         }
@@ -73,12 +74,35 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
 
         print!("\x1b[{};{}f", p.y, p.x);
 
-        match p.facing {
-            Directions::Down => print!("║"),
-            Directions::Up => print!("║"),
-            Directions::Left => print!("═"),
-            Directions::Right => print!("═"),
-            _ => print!("║"),
+        let previous_block_facing = match i {
+            0 => &p.facing,
+            1.. => &state.snake.positions[i - 1].facing,
+        };
+
+        if &p.facing != previous_block_facing {
+            match (previous_block_facing, &p.facing) {
+                (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
+                    print!("╔");
+                }
+                (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
+                    print!("╚");
+                }
+                (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
+                    print!("╗")
+                }
+                (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
+                    print!("╝")
+                }
+                _ => print!("║"),
+            }
+        } else {
+            match p.facing {
+                Directions::Down => print!("║"),
+                Directions::Up => print!("║"),
+                Directions::Left => print!("═"),
+                Directions::Right => print!("═"),
+                _ => print!("║"),
+            }
         }
     }
 
