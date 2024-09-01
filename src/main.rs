@@ -1,7 +1,7 @@
 extern crate libc;
 
 use libc::{ tcsetattr, STDIN_FILENO, TCSANOW };
-use random::random::Random;
+use state::food::Food;
 use std::fs::File;
 use std::io::Write;
 use std::thread;
@@ -22,6 +22,10 @@ pub mod terminal;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
+
+    // Todo: snake should be drawn in the middle of the arena, not the terminal.
+    // This means implementing coordinates for the arena
+
     if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
         let (cols, rows) = Terminal::get_console_size();
         let middle_x = (cols + 1) / 2;
@@ -80,7 +84,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
 
     if snake_eaten {
         state.snake.grow(1);
-        state = drawn_random_food(state);
+        state = Food::new_random(state, 1)?;
     }
 
     match std::io::stdout().flush() {
@@ -135,19 +139,6 @@ fn draw_arena() {
     }
 }
 
-fn drawn_random_food(mut state: GameState) -> GameState {
-    let (cols, rows) = Terminal::get_console_size();
-    let rand_cols = Random::time_seed().get(2, (cols - 3) as u128);
-    let rand_rows = Random::time_seed().get(4, (rows - 3) as u128);
-
-    state.food.positions[0] = (rand_cols as i16, rand_rows as i16);
-
-    print!("\x1b[{};{}f", rand_rows, rand_cols);
-    print!("▫");
-
-    state
-}
-
 fn draw_score(state: &GameState) {
     let (cols, _) = Terminal::get_console_size();
 
@@ -159,7 +150,7 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
 
-    state = drawn_random_food(state);
+    state = Food::new_random(state, 1)?;
 
     loop {
         state = InputHandler::handle_input(state, &file);
