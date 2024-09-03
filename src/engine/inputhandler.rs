@@ -35,9 +35,7 @@ impl InputHandler {
 
                 state
             }
-            Err(_) => {
-                state
-            }
+            Err(_) => state,
         }
     }
 }
