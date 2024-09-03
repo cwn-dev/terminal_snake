@@ -6,7 +6,7 @@ use state::food::Food;
 use std::fs::File;
 use std::io::Write;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use state::directions::Directions;
 use state::gamestate::GameState;
@@ -139,10 +139,12 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
 
     state = Arena::create_level_1(state);
     state = Food::new_random(state, 1)?;
+    state = draw_snake(state)?;
+
+    let mut time_since_draw = Instant::now();
 
     loop {
         state = InputHandler::handle_input(state, &file);
-        state = draw_snake(state)?;
         draw_arena(&state);
         draw_score(&state);
 
@@ -150,8 +152,14 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
             break;
         }
 
-        //thread::sleep(Duration::from_millis(16)); // about 60 fps
-        thread::sleep(Duration::from_millis(200));
+        // Update Snake only after the given duration has passed.
+        // This means Snake remains controllable while having fast updates and input.
+        if time_since_draw.elapsed() >= Duration::from_millis(200) {
+            state = draw_snake(state)?;
+            time_since_draw = Instant::now();
+        }
+
+        thread::sleep(Duration::from_millis(16)); // about 60 fps
     }
 
     Ok(())
