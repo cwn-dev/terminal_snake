@@ -1,6 +1,7 @@
 extern crate libc;
 
 use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
+use state::arena::Arena;
 use state::food::Food;
 use std::fs::File;
 use std::io::Write;
@@ -68,6 +69,16 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
             }
         }
 
+        if state
+            .arena
+            .positions
+            .iter()
+            .map(|pos| (pos.0, pos.1))
+            .any(|x| x == (p.x.try_into().unwrap(), p.y.try_into().unwrap()))
+        {
+            state.snake.x_x = true;
+        }
+
         print!("\x1b[{};{}f", p.y, p.x);
 
         let previous_block_facing = match i {
@@ -106,9 +117,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     }
 
     match std::io::stdout().flush() {
-        Ok(_) => {
-            Ok(state)
-        }
+        Ok(_) => Ok(state),
         Err(_) => Err(SnakeError),
     }
 
@@ -116,44 +125,10 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     //println!("{:?}", &state);
 }
 
-fn draw_arena() {
-    let (cols, rows) = Terminal::get_console_size();
-
-    // Todo: we need some way of tracking where other blocks have been drawn on
-    // so we don't have to manually track stuff like this starting on row 3...
-
-    // Draw the corners
-    print!("\x1b[{};{}f", 3, cols - 1); // top right
-    print!("╮");
-    print!("\x1b[{};{}f", rows - 1, cols - 1); // bottom right
-    print!("╯");
-    print!("\x1b[{};{}f", rows - 1, 1); // bottom left
-    print!("╰");
-    print!("\x1b[{};{}f", 3, 1); // top left
-    print!("╭");
-
-    // Draw the top line
-    for i in 2..cols - 1 {
-        print!("\x1b[{};{}f", 3, i);
-        print!("─");
-    }
-
-    // Draw the right line
-    for i in 4..rows - 1 {
-        print!("\x1b[{};{}f", i, cols - 1);
-        print!("│");
-    }
-
-    // Draw the bottom line
-    for i in 2..cols - 1 {
-        print!("\x1b[{};{}f", rows - 1, i);
-        print!("─");
-    }
-
-    // Draw the left line
-    for i in 4..rows - 1 {
-        print!("\x1b[{};{}f", i, 1);
-        print!("│");
+fn draw_arena(state: &GameState) {
+    for (x, y, char) in &state.arena.positions {
+        print!("\x1b[{};{}f", y, x);
+        print!("{}", char);
     }
 }
 
@@ -169,15 +144,23 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
     let mut state = GameState::new();
 
     state = Food::new_random(state, 1)?;
+    state = Arena::create_level_1(state);
 
     loop {
         state = InputHandler::handle_input(state, &file);
         state = draw_snake(state)?;
+        draw_arena(&state);
         draw_score(&state);
+
+        if state.snake.x_x {
+            break;
+        }
 
         //thread::sleep(Duration::from_millis(16)); // about 60 fps
         thread::sleep(Duration::from_millis(200));
     }
+
+    Ok(())
 }
 
 fn main() {
@@ -198,10 +181,11 @@ fn main() {
 
     // Todo: get the current console size and store it in the game state.
 
-    draw_arena();
-
     if game_loop(file).is_ok() {
-        print!("Game loop finished");
+        // todo: clear screen function here.
+        print!("\x1b[H");
+        print!("\x1b[2J");
+        println!("x_x you died.");
     }
 
     // Restore original terminal settings

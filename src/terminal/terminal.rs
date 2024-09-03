@@ -55,6 +55,7 @@ impl Terminal {
             ioctl(STDIN_FILENO, TIOCGWINSZ, &mut ws);
         }
 
+        // Error check this conversion.
         (ws.ws_col, ws.ws_row)
     }
 }

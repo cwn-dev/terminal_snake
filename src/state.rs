@@ -1,3 +1,4 @@
+pub mod arena;
 pub mod coords;
 pub mod directions;
 pub mod food;

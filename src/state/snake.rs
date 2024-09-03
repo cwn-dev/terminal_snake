@@ -12,6 +12,9 @@ pub struct Snake {
 
     // Holds the direction snake's head is currently facing
     pub direction: Directions,
+
+    // Snake is dead x_x
+    pub x_x: bool,
 }
 
 impl Snake {
@@ -23,6 +26,7 @@ impl Snake {
                 facing: Directions::None,
             }; 20],
             direction: Directions::None,
+            x_x: false,
         }
     }
 
@@ -161,6 +165,7 @@ mod tests {
                 facing: Directions::None,
             }; 20],
             direction: Directions::Up,
+            x_x: false,
         };
 
         snake.positions[0].x = 5;
@@ -192,6 +197,7 @@ mod tests {
                 facing: Directions::None,
             }; 20],
             direction: Directions::Up,
+            x_x: false,
         };
 
         for i in 0..13 {
@@ -235,6 +241,7 @@ mod tests {
                 facing: direction,
             }; 20],
             direction: direction,
+            x_x: false,
         };
 
         snake.positions[0].x = 10;

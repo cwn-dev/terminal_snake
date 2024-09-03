@@ -1,3 +1,4 @@
+use super::arena::Arena;
 use super::food::Food;
 use super::snake::Snake;
 
@@ -5,17 +6,19 @@ use super::snake::Snake;
 pub struct GameState {
     pub snake: Snake,
     pub food: Food,
+    pub arena: Arena,
     pub score: i16,
 }
 
 impl GameState {
     pub fn new() -> Self {
         GameState {
-            score: 0,
             snake: Snake::new(),
             food: Food {
                 positions: [(-1, -1); 3],
             },
+            arena: Arena::new(),
+            score: 0,
         }
     }
 }
