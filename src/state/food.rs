@@ -18,8 +18,13 @@ impl Food {
         }
 
         // Tried to spawn food on top of part of Snake.
-        if state.snake.positions.iter().any(|&pos| (pos.x == rand_cols && pos.y == rand_rows)) {
-            return Food::new_random(state, count)
+        if state
+            .snake
+            .positions
+            .iter()
+            .any(|&pos| (pos.x == rand_cols && pos.y == rand_rows))
+        {
+            return Food::new_random(state, count);
         }
 
         state.food.positions[0] = (rand_cols as i16, rand_rows as i16);
