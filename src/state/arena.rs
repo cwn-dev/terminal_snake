@@ -26,7 +26,10 @@ impl Arena {
 
         // Corners
         state.arena.positions.push((cols - 1, 3, String::from("╮")));
-        state.arena.positions.push((cols - 1, rows - 1, String::from("╯")));
+        state
+            .arena
+            .positions
+            .push((cols - 1, rows - 1, String::from("╯")));
         state.arena.positions.push((1, rows - 1, String::from("╰")));
         state.arena.positions.push((1, 3, String::from("╭")));
 
@@ -47,17 +50,9 @@ impl Arena {
 
     pub fn middle_coords(arena: &Arena) -> Result<(u16, u16), SnakeError> {
         // todo: remove unwraps.  Was testing. Alternative at the time was insanity
-        let x_max = arena.positions
-            .iter()
-            .map(|pos| (pos.0))
-            .max()
-            .unwrap();
+        let x_max = arena.positions.iter().map(|pos| (pos.0)).max().unwrap();
 
-        let y_max = arena.positions
-            .iter()
-            .map(|pos| (pos.1))
-            .max()
-            .unwrap();
+        let y_max = arena.positions.iter().map(|pos| (pos.1)).max().unwrap();
 
         let x_middle = (x_max + 1) / 2;
         let y_middle = (y_max + 1) / 2;
