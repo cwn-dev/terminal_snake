@@ -18,8 +18,8 @@ impl Arena {
     pub fn create_level_1(mut state: GameState) -> GameState {
         let (cols, rows) = Terminal::get_console_size();
 
-        // let cols = cols / 2;
-        // let rows = rows / 2;
+        let cols = cols / 2;
+        let rows = rows / 2;
 
         // Todo: we need some way of tracking where other blocks have been drawn on
         // so we don't have to manually track stuff like this starting on row 3...

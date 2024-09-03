@@ -1,4 +1,4 @@
-use crate::{error::SnakeError, random::random::Random, terminal::terminal::Terminal};
+use crate::{error::SnakeError, random::random::Random, state::arena::Arena};
 
 use super::gamestate::GameState;
 
@@ -9,7 +9,7 @@ pub struct Food {
 
 impl Food {
     pub fn new_random(mut state: GameState, count: i8) -> Result<GameState, SnakeError> {
-        let (cols, rows) = Terminal::get_console_size();
+        let (cols, rows) = Arena::middle_coords(&state.arena)?;
         let rand_cols = Random::time_seed().get(2, (cols - 3) as u128);
         let rand_rows = Random::time_seed().get(4, (rows - 3) as u128);
 
