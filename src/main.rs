@@ -137,8 +137,8 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
 
-    state = Food::new_random(state, 1)?;
     state = Arena::create_level_1(state);
+    state = Food::new_random(state, 1)?;
 
     loop {
         state = InputHandler::handle_input(state, &file);
