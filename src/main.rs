@@ -23,17 +23,11 @@ pub mod terminal;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
-
-    // Todo: snake should be drawn in the middle of the arena, not the terminal.
-    // This means implementing coordinates for the arena
-
     if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
-        let (cols, rows) = Terminal::get_console_size();
-        let middle_x = (cols + 1) / 2;
-        let middle_y = (rows + 1) / 2;
+        let (x_middle, y_middle) = Arena::middle_coords(&state.arena)?;
 
-        state.snake.positions[0].x = middle_x as i16;
-        state.snake.positions[0].y = middle_y as i16;
+        state.snake.positions[0].x = x_middle as i16;
+        state.snake.positions[0].y = y_middle as i16;
 
         return Ok(state);
     }
