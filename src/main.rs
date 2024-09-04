@@ -1,6 +1,6 @@
 extern crate libc;
 
-use libc::{tcsetattr, STDIN_FILENO, TCSANOW};
+use libc::{tcsetattr, termios, STDIN_FILENO, TCSANOW};
 use state::arena::Arena;
 use state::food::Food;
 use std::fs::File;
@@ -203,10 +203,14 @@ fn main() {
         print!("\x1b[H");
         print!("\x1b[2J");
         println!("x_x you died.");
-    }
 
+        restore_terminal(&original_term);
+    }
+}
+
+fn restore_terminal(terminal: &termios) {
     // Restore original terminal settings
     unsafe {
-        tcsetattr(STDIN_FILENO, TCSANOW, &original_term);
+        tcsetattr(STDIN_FILENO, TCSANOW, terminal);
     }
 }
