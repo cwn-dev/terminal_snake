@@ -49,15 +49,30 @@ impl Arena {
     }
 
     pub fn middle_coords(arena: &Arena) -> Result<(u16, u16), SnakeError> {
-        // todo: remove unwraps.  Was testing. Alternative at the time was insanity
-        let x_max = arena.positions.iter().map(|pos| (pos.0)).max().unwrap();
-
-        let y_max = arena.positions.iter().map(|pos| (pos.1)).max().unwrap();
-
+        let x_max = Arena::max_x(arena)?;
+        let y_max = Arena::max_y(arena)?;
+        
         let x_middle = (x_max + 1) / 2;
         let y_middle = (y_max + 1) / 2;
-
+        
         Ok((x_middle, y_middle))
+    }
+
+    pub fn max_arena_coords(arena: &Arena) -> Result<(u16, u16), SnakeError> {
+        let max_x = Arena::max_x(arena)?;
+        let max_y = Arena::max_y(arena)?;
+
+        Ok((max_x, max_y))
+    }
+    
+    fn max_x(arena: &Arena) -> Result<u16, SnakeError> {
+        // todo: remove unwraps.  Was testing. Alternative at the time was insanity
+        Ok(arena.positions.iter().map(|pos| (pos.0)).max().unwrap())
+    }
+
+    fn max_y(arena: &Arena) -> Result<u16, SnakeError> {
+        // todo: remove unwraps.  Was testing. Alternative at the time was insanity
+        Ok(arena.positions.iter().map(|pos| (pos.1)).max().unwrap())
     }
 }
 
