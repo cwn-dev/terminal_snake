@@ -108,6 +108,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
     if snake_eaten {
         state.snake.grow(1);
         state = Food::new_random(state, 1)?;
+        draw_food(&state)?;
     }
 
     match std::io::stdout().flush() {
@@ -133,6 +134,19 @@ fn draw_score(state: &GameState) {
     print!("{}", state.score);
 }
 
+fn draw_food(state: &GameState) -> Result<(), SnakeError> {
+    for (x, y) in state.food.positions {
+        if x == -1 || y == -1 {
+            continue;
+        }
+
+        print!("\x1b[{};{}f", y, x);
+        print!("⭗");
+    }
+
+    Ok(())
+}
+
 fn game_loop(file: File) -> Result<(), SnakeError> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
@@ -140,6 +154,7 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
     state = Arena::create_level_1(state);
     state = Food::new_random(state, 1)?;
     state = draw_snake(state)?;
+    draw_food(&state)?;
 
     let mut time_since_draw = Instant::now();
 

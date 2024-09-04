@@ -29,12 +29,6 @@ impl Food {
 
         state.food.positions[0] = (rand_cols, rand_rows);
 
-        // Todo: move to drawing or graphics module.
-        // This function should only add the position of the
-        // food piece to the array. Ultimately draw the food in draw_game()
-        print!("\x1b[{};{}f", rand_rows, rand_cols);
-        print!("⭗");
-
         Ok(state)
     }
 }
