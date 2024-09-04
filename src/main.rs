@@ -209,7 +209,7 @@ fn main() {
 }
 
 fn restore_terminal(terminal: &termios) {
-    // Restore original terminal settings
+    // Restore original terminal settings.
     unsafe {
         tcsetattr(STDIN_FILENO, TCSANOW, terminal);
     }
