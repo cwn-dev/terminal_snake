@@ -159,7 +159,7 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
             time_since_draw = Instant::now();
         }
 
-        thread::sleep(Duration::from_millis(16)); // about 60 fps
+        thread::sleep(Duration::from_millis(8)); // about 120 fps
     }
 
     Ok(())
