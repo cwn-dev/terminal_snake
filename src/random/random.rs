@@ -7,11 +7,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[derive(Debug)]
 pub struct Random {
     // We used a u128 seed here as that's compatible with epoch as nanoseconds.
-    seed: u128,
+    seed: u32,
 }
 
 impl Random {
-    fn new(seed: u128) -> Self {
+    fn new(seed: u32) -> Self {
         Random { seed }
     }
 
@@ -20,7 +20,7 @@ impl Random {
     //
     pub fn time_seed() -> Self {
         match SystemTime::now().duration_since(UNIX_EPOCH) {
-            Ok(n) => Random::new(n.as_nanos()),
+            Ok(n) => Random::new(n.subsec_nanos()/10^9),
             Err(_) => panic!("Your clock is broken, or something."),
         }
     }
@@ -29,10 +29,10 @@ impl Random {
     // The LCG algorithm
     // https://en.wikipedia.org/wiki/Linear_congruential_generator
     //
-    fn next(&mut self) -> u128 {
-        let a: u128 = 1664525;
+    fn next(&mut self) -> u32 {
+        let a: u32 = 1664525;
         let c = 1013904223;
-        let m = u128::MAX;
+        let m = u32::MAX;
 
         self.seed = a.wrapping_mul(self.seed).wrapping_add(c) % m;
         self.seed
@@ -41,7 +41,7 @@ impl Random {
     //
     // Some modulo wizardry to effectively get an output from the LCG within a min/max range
     //
-    pub fn get(&mut self, min: u128, max: u128) -> u128 {
+    pub fn get(&mut self, min: u32, max: u32) -> u32 {
         min + (self.next() % (max - min + 1))
     }
 }
@@ -58,8 +58,8 @@ mod tests {
         let r3 = r.next();
 
         assert_eq!(r1, 1083814273);
-        assert_eq!(r2, 1804036966669548);
-        assert_eq!(r3, 3002864631946643288923);
+        assert_eq!(r2, 378494188);
+        assert_eq!(r3, 2479403867);
     }
 
     //
@@ -67,16 +67,16 @@ mod tests {
     //
     #[test]
     fn get_should_return_number_in_range() {
-        let mut r = Random::new(76454354354);
-        assert_eq!(r.get(1, 100), 74);
-        assert_eq!(r.get(1, 100), 49);
-        assert_eq!(r.get(1, 100), 24);
+        let mut r = Random::new(764543543);
         assert_eq!(r.get(1, 100), 99);
-        assert_eq!(r.get(1, 100), 54);
-        assert_eq!(r.get(1, 100), 9);
-        assert_eq!(r.get(1, 100), 40);
-        assert_eq!(r.get(1, 100), 99);
-        assert_eq!(r.get(1, 100), 82);
+        assert_eq!(r.get(1, 100), 90);
+        assert_eq!(r.get(1, 100), 45);
+        assert_eq!(r.get(1, 100), 64);
+        assert_eq!(r.get(1, 100), 27);
+        assert_eq!(r.get(1, 100), 90);
+        assert_eq!(r.get(1, 100), 1);
+        assert_eq!(r.get(1, 100), 20);
+        assert_eq!(r.get(1, 100), 47);
     }
 
     //
