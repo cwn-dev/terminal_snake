@@ -33,7 +33,7 @@ impl Food {
         // This function should only add the position of the
         // food piece to the array. Ultimately draw the food in draw_game()
         print!("\x1b[{};{}f", rand_rows, rand_cols);
-        print!("▫");
+        print!("⭗");
 
         Ok(state)
     }
