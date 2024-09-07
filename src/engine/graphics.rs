@@ -1,4 +1,4 @@
-use super::{snengine_error::SnengineError, unicode::UnicodeCharacter};
+use super::{snengine_error::SnengineError, unicode_character::UnicodeCharacter};
 
 pub struct Graphics {
     x: i16,
