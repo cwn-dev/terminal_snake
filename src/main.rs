@@ -1,5 +1,7 @@
 extern crate libc;
 
+use engine::graphics::Graphics;
+use engine::unicode_character::UnicodeCharacter;
 use libc::{tcsetattr, termios, STDIN_FILENO, TCSANOW};
 use state::arena::Arena;
 use state::food::Food;
@@ -73,8 +75,6 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
             state.snake.x_x = true;
         }
 
-        print!("\x1b[{};{}f", p.y, p.x);
-
         let previous_block_facing = match i {
             1.. => &state.snake.positions[i - 1].facing,
             _ => &p.facing,
@@ -84,24 +84,29 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
         // vs. the current facing.  Draw corner pieces etc. accordingly.
         match (previous_block_facing, &p.facing) {
             (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
-                print!("╔");
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndRight)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
             }
             (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
-                print!("╚");
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndRight)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
             }
             (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
-                print!("╗")
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndLeft)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
             }
             (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
-                print!("╝")
-            }
-            (Directions::Down, Directions::Down) | (Directions::Up, Directions::Up) => {
-                print!("║")
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndLeft)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
             }
             (Directions::Left, Directions::Left) | (Directions::Right, Directions::Right) => {
-                print!("═")
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleHorizontal)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
             }
-            _ => print!("║"),
+            _ => { // Down, Up and None
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleVertical)
+                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+            }
         }
     }
 
@@ -113,7 +118,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
 
     match std::io::stdout().flush() {
         Ok(_) => Ok(state),
-        Err(_) => Err(SnakeError),
+        Err(_) => Err(SnakeError::SnengineError(None)),
     }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
@@ -169,7 +174,7 @@ fn game_loop(file: File) -> Result<(), SnakeError> {
 
         // Update Snake only after the given duration has passed.
         // This means Snake remains controllable while having fast updates and input.
-        if time_since_draw.elapsed() >= Duration::from_millis(200) {
+        if time_since_draw.elapsed() >= Duration::from_millis(100) {
             state = draw_snake(state)?;
             time_since_draw = Instant::now();
         }

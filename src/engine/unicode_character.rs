@@ -4,7 +4,7 @@ pub enum UnicodeCharacter {
     BoxDoubleVertical,
     BoxDoubleDownAndRight,
     BoxDoubleDownAndLeft,
-    BoxDoubleUpAnRight,
+    BoxDoubleUpAndRight,
     BoxDoubleUpAndLeft,
 }
 
@@ -16,7 +16,7 @@ impl UnicodeCharacter {
             UnicodeCharacter::BoxDoubleVertical => '\u{2551}',           // ║
             UnicodeCharacter::BoxDoubleDownAndRight => '\u{2554}',       // ╔
             UnicodeCharacter::BoxDoubleDownAndLeft => '\u{2557}',        // ╗
-            UnicodeCharacter::BoxDoubleUpAnRight => '\u{255A}',          // ╚
+            UnicodeCharacter::BoxDoubleUpAndRight => '\u{255A}',         // ╚
             UnicodeCharacter::BoxDoubleUpAndLeft => '\u{255D}',          // ╝
         }
     }

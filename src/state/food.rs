@@ -14,7 +14,7 @@ impl Food {
         let rand_rows = Random::time_seed().get(4, (rows - 1).into()) as i16;
 
         if (count as usize) > state.food.positions.len() {
-            return Err(SnakeError);
+            return Err(SnakeError::SnengineError(None));
         }
 
         // Tried to spawn food on top of part of Snake.
