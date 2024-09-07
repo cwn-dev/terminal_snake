@@ -1,8 +1,10 @@
-use std::fmt;
+use std::{error::Error, fmt};
 
 pub struct SnengineError {
     message: String,
 }
+
+impl Error for SnengineError {}
 
 impl SnengineError {
     pub fn new(message: &str) -> Self {

@@ -5,6 +5,7 @@ use engine::unicode_character::UnicodeCharacter;
 use libc::{tcsetattr, termios, STDIN_FILENO, TCSANOW};
 use state::arena::Arena;
 use state::food::Food;
+use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 use std::thread;
@@ -23,7 +24,7 @@ pub mod random;
 pub mod state;
 pub mod terminal;
 
-fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
+fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
     if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
         let (x_middle, y_middle) = Arena::middle_coords(&state.arena)?;
@@ -84,28 +85,23 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
         // vs. the current facing.  Draw corner pieces etc. accordingly.
         match (previous_block_facing, &p.facing) {
             (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndRight)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndRight)?
             }
             (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndRight)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndRight)?
             }
             (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndLeft)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndLeft)?
             }
             (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndLeft)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndLeft)?
             }
             (Directions::Left, Directions::Left) | (Directions::Right, Directions::Right) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleHorizontal)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleHorizontal)?
             }
-            _ => { // Down, Up and None
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleVertical)
-                    .map_err(|e| SnakeError::SnengineError(Some(e)))?
+            _ => {
+                // Down, Up and None
+                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleVertical)?
             }
         }
     }
@@ -118,7 +114,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, SnakeError> {
 
     match std::io::stdout().flush() {
         Ok(_) => Ok(state),
-        Err(_) => Err(SnakeError::SnengineError(None)),
+        Err(e) => Err(e.into()),
     }
 
     // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
@@ -152,7 +148,7 @@ fn draw_food(state: &GameState) -> Result<(), SnakeError> {
     Ok(())
 }
 
-fn game_loop(file: File) -> Result<(), SnakeError> {
+fn game_loop(file: File) -> Result<(), Box<dyn Error>> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
 
