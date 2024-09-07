@@ -7,7 +7,7 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    pub fn draw(&self) -> Result<(), SnengineError> {
+    pub fn draw_char(&self) -> Result<(), SnengineError> {
         if self.y == -1 || self.x == -1 {
             return Err(SnengineError::new(
                 format!("Cannot draw at {}, {}", self.x, self.y).as_str(),
