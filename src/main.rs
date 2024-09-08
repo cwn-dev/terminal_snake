@@ -140,14 +140,18 @@ fn draw_score(state: &GameState) -> Result<(), SnengineError> {
     Graphics::write(cols - 1, 2, state.score.to_string())
 }
 
-fn draw_food(state: &GameState) -> Result<(), SnakeError> {
+fn draw_food(state: &GameState) -> Result<(), SnengineError> {
     for (x, y) in state.food.positions {
         if x == -1 || y == -1 {
             continue;
         }
 
-        print!("\x1b[{};{}f", y, x);
-        print!("⭗");
+        // Todo: make food.positions use the Coords struct
+        // so that we don't have to do this silliness...
+        let x_u: u16 = x.try_into().unwrap();
+        let y_u: u16 = y.try_into().unwrap();
+
+        Graphics::draw_char(x_u, y_u, Unicode::HeavyCircleWithCircleInside)?
     }
 
     Ok(())
