@@ -156,7 +156,7 @@ fn draw_food(state: &GameState) -> Result<(), SnengineError> {
     Ok(())
 }
 
-fn game_loop(file: File) -> Result<(), Box<dyn Error>> {
+fn game_loop(file: File) -> Result<GameState, Box<dyn Error>> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
 
@@ -186,7 +186,7 @@ fn game_loop(file: File) -> Result<(), Box<dyn Error>> {
         thread::sleep(Duration::from_millis(8)); // about 120 fps
     }
 
-    Ok(())
+    Ok(state)
 }
 
 fn main() {
@@ -209,11 +209,11 @@ fn main() {
     // Todo: get the current console size and store it in the game state.
 
     match game_loop(file) {
-        Ok(_) => {
+        Ok(g) => {
             // todo: clear screen function here.
             print!("\x1b[H");
             print!("\x1b[2J");
-            println!("x_x you died.");
+            println!("x_x you died. You got {}...", g.score);
         }
         Err(e) => {
             // todo: clear screen function here.
