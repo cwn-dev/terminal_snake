@@ -1,15 +1,16 @@
 extern crate libc;
 
 use engine::graphics::Graphics;
-use engine::unicode_character::UnicodeCharacter;
+use engine::snengine_error::SnengineError;
+use engine::unicode::Unicode;
 use libc::{tcsetattr, termios, STDIN_FILENO, TCSANOW};
 use state::arena::Arena;
 use state::food::Food;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
-use std::thread;
 use std::time::{Duration, Instant};
+use std::{i16, thread};
 
 use state::directions::Directions;
 use state::gamestate::GameState;
@@ -44,8 +45,9 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
             continue;
         }
 
-        print!("\x1b[{};{}f", p.y, p.x);
-        print!(" ");
+        let (ux, uy) = p.to_unsigned_tuple();
+
+        Graphics::draw_char(ux, uy, Unicode::Space)?;
     }
 
     state.snake.step();
@@ -53,9 +55,11 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
 
     // Draw the new snake
     for (i, p) in state.snake.positions.iter().enumerate() {
-        if p.x == -1 || p.y == -1 {
-            continue;
-        }
+        // Continue if coordinates are off screen
+        let (x, y): (u16, u16) = match (p.x, p.y) {
+            (_, _) if p.x == -1 || p.y == -1 => continue,
+            (_, _) => (p.x.try_into().unwrap(), p.y.try_into().unwrap()), // YOLO
+        };
 
         // Did we eat something?
         if state.food.positions.iter().any(|&x| x == (p.x, p.y)) {
@@ -85,23 +89,23 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
         // vs. the current facing.  Draw corner pieces etc. accordingly.
         match (previous_block_facing, &p.facing) {
             (Directions::Down, Directions::Left) | (Directions::Right, Directions::Up) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndRight)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleDownAndRight)?
             }
             (Directions::Up, Directions::Left) | (Directions::Right, Directions::Down) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndRight)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleUpAndRight)?
             }
             (Directions::Down, Directions::Right) | (Directions::Left, Directions::Up) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleDownAndLeft)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleDownAndLeft)?
             }
             (Directions::Left, Directions::Down) | (Directions::Up, Directions::Right) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleUpAndLeft)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleUpAndLeft)?
             }
             (Directions::Left, Directions::Left) | (Directions::Right, Directions::Right) => {
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleHorizontal)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleHorizontal)?
             }
             _ => {
                 // Down, Up and None
-                Graphics::draw_char(p.x, p.y, UnicodeCharacter::BoxDoubleVertical)?
+                Graphics::draw_char(x, y, Unicode::BoxDoubleVertical)?
             }
         }
     }
@@ -121,11 +125,13 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
     //println!("{:?}", &state);
 }
 
-fn draw_arena(state: &GameState) {
+fn draw_arena(state: &GameState) -> Result<(), SnengineError> {
+    // todo: add DrawingError?
     for (x, y, char) in &state.arena.positions {
-        print!("\x1b[{};{}f", y, x);
-        print!("{}", char);
+        Graphics::draw_char(*x, *y, char.clone())?;
     }
+
+    Ok(())
 }
 
 fn draw_score(state: &GameState) {
@@ -161,7 +167,7 @@ fn game_loop(file: File) -> Result<(), Box<dyn Error>> {
 
     loop {
         state = InputHandler::handle_input(state, &file);
-        draw_arena(&state);
+        draw_arena(&state)?;
         draw_score(&state);
 
         if state.snake.x_x {
@@ -200,14 +206,23 @@ fn main() {
 
     // Todo: get the current console size and store it in the game state.
 
-    if game_loop(file).is_ok() {
-        // todo: clear screen function here.
-        print!("\x1b[H");
-        print!("\x1b[2J");
-        println!("x_x you died.");
+    match game_loop(file) {
+        Ok(_) => {
+            // todo: clear screen function here.
+            print!("\x1b[H");
+            print!("\x1b[2J");
+            println!("x_x you died.");
+        }
+        Err(e) => {
+            // todo: clear screen function here.
+            print!("\x1b[H");
+            print!("\x1b[2J");
 
-        restore_terminal(&original_term);
+            println!("{}", e);
+        }
     }
+
+    restore_terminal(&original_term)
 }
 
 fn restore_terminal(terminal: &termios) {

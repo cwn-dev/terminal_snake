@@ -1,11 +1,11 @@
-use crate::{error::SnakeError, terminal::terminal::Terminal};
+use crate::{engine::unicode::Unicode, error::SnakeError, terminal::terminal::Terminal};
 
 use super::gamestate::GameState;
 
 #[derive(Debug)]
 pub struct Arena {
     // x, y, character
-    pub positions: Vec<(u16, u16, String)>,
+    pub positions: Vec<(u16, u16, Unicode)>,
 }
 
 impl Arena {
@@ -25,24 +25,45 @@ impl Arena {
         // so we don't have to manually track stuff like this starting on row 3...
 
         // Corners
-        state.arena.positions.push((cols - 1, 3, String::from("╮")));
         state
             .arena
             .positions
-            .push((cols - 1, rows - 1, String::from("╯")));
-        state.arena.positions.push((1, rows - 1, String::from("╰")));
-        state.arena.positions.push((1, 3, String::from("╭")));
+            .push((cols - 1, 3, Unicode::BoxLightArcDownAndLeft));
+        state
+            .arena
+            .positions
+            .push((cols - 1, rows - 1, Unicode::BoxLightArcUpAndLeft));
+        state
+            .arena
+            .positions
+            .push((1, rows - 1, Unicode::BoxLightArcUpAndRight));
+        state
+            .arena
+            .positions
+            .push((1, 3, Unicode::BoxLightArcDownAndRight));
 
         // Top and bottom lines
         for i in 2..cols - 1 {
-            state.arena.positions.push((i, 3, String::from("─")));
-            state.arena.positions.push((i, rows - 1, String::from("─")));
+            state
+                .arena
+                .positions
+                .push((i, 3, Unicode::BoxLightHorizontal));
+            state
+                .arena
+                .positions
+                .push((i, rows - 1, Unicode::BoxLightHorizontal));
         }
 
         // Right and left lines
         for i in 4..rows - 1 {
-            state.arena.positions.push((cols - 1, i, String::from("│")));
-            state.arena.positions.push((1, i, String::from("│")));
+            state
+                .arena
+                .positions
+                .push((cols - 1, i, Unicode::BoxLightVertical));
+            state
+                .arena
+                .positions
+                .push((1, i, Unicode::BoxLightVertical));
         }
 
         state
