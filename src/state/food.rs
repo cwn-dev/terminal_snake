@@ -10,7 +10,7 @@ pub struct Food {
 impl Food {
     pub fn new_random(mut state: GameState, count: i8) -> Result<GameState, SnakeError> {
         let (cols, rows) = Arena::max_arena_coords(&state.arena)?;
-        let rand_cols = Random::time_seed().get(1, (cols - 1).into()) as i16;
+        let rand_cols = Random::time_seed().get(2, (cols - 1).into()) as i16;
         let rand_rows = Random::time_seed().get(4, (rows - 1).into()) as i16;
 
         if (count as usize) > state.food.positions.len() {
