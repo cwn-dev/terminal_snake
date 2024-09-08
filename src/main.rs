@@ -134,11 +134,10 @@ fn draw_arena(state: &GameState) -> Result<(), SnengineError> {
     Ok(())
 }
 
-fn draw_score(state: &GameState) {
+fn draw_score(state: &GameState) -> Result<(), SnengineError> {
     let (cols, _) = Terminal::get_console_size();
 
-    print!("\x1b[{};{}f", 2, cols - 1);
-    print!("{}", state.score);
+    Graphics::write(cols - 1, 2, state.score.to_string())
 }
 
 fn draw_food(state: &GameState) -> Result<(), SnakeError> {
@@ -168,7 +167,7 @@ fn game_loop(file: File) -> Result<(), Box<dyn Error>> {
     loop {
         state = InputHandler::handle_input(state, &file);
         draw_arena(&state)?;
-        draw_score(&state);
+        draw_score(&state)?;
 
         if state.snake.x_x {
             break;

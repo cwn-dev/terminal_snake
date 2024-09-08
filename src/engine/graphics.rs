@@ -18,6 +18,16 @@ impl Graphics {
 
         Ok(())
     }
+
+    pub fn write(x: u16, y: u16, text: String) -> Result<(), SnengineError> {
+        // Todo: expand this a bit. Need the x & y = 0 check,
+        // but don't want to have to repeat myself. Will
+        // look later.
+        print!("\x1b[{};{}f", y, x);
+        print!("{}", text);
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
