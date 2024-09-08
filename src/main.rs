@@ -16,7 +16,6 @@ use state::directions::Directions;
 use state::gamestate::GameState;
 
 use engine::inputhandler::InputHandler;
-use error::SnakeError;
 use terminal::terminal::Terminal;
 
 pub mod engine;
