@@ -194,7 +194,8 @@ fn main() {
     // Hide the cursor
     print!("\x1b[?25l");
 
-    println!("Welcome to terminal_snake");
+    // <Esc>[38;2;<FG_R>;<FG_G>;<FG_B>;<BG_R>;<BG_G>;<BG_B>m
+    println!("\x1b[38;2;0;72;186;48;2;255;255;255mWelcome to terminal_snake\x1b[0m");
     println!("Press any key to start");
 
     // Todo: get the current console size and store it in the game state.
