@@ -1,5 +1,6 @@
 extern crate libc;
 
+use engine::coords::Coords;
 use engine::graphics::Graphics;
 use engine::snengine_error::SnengineError;
 use engine::unicode::Unicode;
@@ -26,11 +27,11 @@ pub mod terminal;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
-    if state.snake.positions[0].x == -1 || state.snake.positions[0].y == -1 {
+    if state.snake.positions[0].coords.x == -1 || state.snake.positions[0].coords.y == -1 {
         let (x_middle, y_middle) = Arena::middle_coords(&state.arena)?;
 
-        state.snake.positions[0].x = x_middle as i16;
-        state.snake.positions[0].y = y_middle as i16;
+        state.snake.positions[0].coords.x = x_middle as i16;
+        state.snake.positions[0].coords.y = y_middle as i16;
 
         return Ok(state);
     }
@@ -40,11 +41,11 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
         // Clear all positions that don't have a facing or have and invalid position.
         // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
         // Todo: add an is_valid() to Coords so we don't have to keep repeating this.
-        if p.facing == Directions::None && (p.x == -1 || p.y == -1) && i > 0 {
+        if p.facing == Directions::None && (p.coords.x == -1 || p.coords.y == -1) && i > 0 {
             continue;
         }
 
-        let (ux, uy) = p.to_unsigned_tuple();
+        let (ux, uy) = p.coords.to_unsigned_tuple();
 
         Graphics::draw_char(ux, uy, Unicode::Space)?;
     }
@@ -54,14 +55,19 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
 
     // Draw the new snake
     for (i, p) in state.snake.positions.iter().enumerate() {
-        // Continue if coordinates are off screen
-        let (x, y): (u16, u16) = match (p.x, p.y) {
-            (_, _) if p.x == -1 || p.y == -1 => continue,
-            (_, _) => (p.x.try_into().unwrap(), p.y.try_into().unwrap()), // YOLO
-        };
+        let (x, y) = p.coords.to_unsigned_tuple();
+
+        if x == 0 || y == 0 {
+            continue;
+        }
 
         // Did we eat something?
-        if state.food.positions.iter().any(|&x| x == (p.x, p.y)) {
+        if state
+            .food
+            .positions
+            .iter()
+            .any(|&x| x == Coords::new(p.coords.x, p.coords.y))
+        {
             state.score += 1;
 
             if !snake_eaten {
@@ -73,8 +79,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
             .arena
             .positions
             .iter()
-            .map(|pos| (pos.0, pos.1))
-            .any(|x| x == (p.x.try_into().unwrap(), p.y.try_into().unwrap()))
+            .any(|c| c.0 == Coords::new(p.coords.x, p.coords.y))
         {
             state.snake.x_x = true;
         }
@@ -119,15 +124,13 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
         Ok(_) => Ok(state),
         Err(e) => Err(e.into()),
     }
-
-    // Todo: implement debug mode so we can see stuff like this in a bar at the bottom
-    //println!("{:?}", &state);
 }
 
 fn draw_arena(state: &GameState) -> Result<(), SnengineError> {
     // todo: add DrawingError?
-    for (x, y, char) in &state.arena.positions {
-        Graphics::draw_char(*x, *y, char.clone())?;
+    for (coords, char) in &state.arena.positions {
+        let (x, y) = coords.to_unsigned_tuple();
+        Graphics::draw_char(x, y, char.clone())?;
     }
 
     Ok(())
@@ -140,17 +143,14 @@ fn draw_score(state: &GameState) -> Result<(), SnengineError> {
 }
 
 fn draw_food(state: &GameState) -> Result<(), SnengineError> {
-    for (x, y) in state.food.positions {
-        if x == -1 || y == -1 {
+    for c in state.food.positions {
+        if c.x == -1 || c.y == -1 {
             continue;
         }
 
-        // Todo: make food.positions use the Coords struct
-        // so that we don't have to do this silliness...
-        let x_u: u16 = x.try_into().unwrap();
-        let y_u: u16 = y.try_into().unwrap();
+        let (x, y) = c.to_unsigned_tuple();
 
-        Graphics::draw_char(x_u, y_u, Unicode::HeavyCircleWithCircleInside)?
+        Graphics::draw_char(x, y, Unicode::HeavyCircleWithCircleInside)?
     }
 
     Ok(())

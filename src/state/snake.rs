@@ -1,5 +1,4 @@
-use super::coords::Coords;
-use super::directions::Directions;
+use super::{directions::Directions, snake_coords::SnakeCoords};
 
 #[derive(Debug)]
 pub struct Snake {
@@ -8,7 +7,7 @@ pub struct Snake {
     // game, or eating, we need to create a new array the size
     // the snake is going to be, populate that, then use that as
     // the snake.
-    pub positions: [Coords; 20],
+    pub positions: [SnakeCoords; 20],
 
     // Holds the direction snake's head is currently facing
     pub direction: Directions,
@@ -20,11 +19,7 @@ pub struct Snake {
 impl Snake {
     pub fn new() -> Self {
         Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: Directions::None,
-            }; 20],
+            positions: [SnakeCoords::default(); 20],
             direction: Directions::None,
             x_x: false,
         }
@@ -39,11 +34,7 @@ impl Snake {
     //
     pub fn step(&mut self) -> &mut Snake {
         let current_head = self.positions[0];
-        let mut new_positions: [Coords; 20] = [Coords {
-            x: -1,
-            y: -1,
-            facing: Directions::None,
-        }; 20];
+        let mut new_positions: [SnakeCoords; 20] = [SnakeCoords::default(); 20];
 
         for (i, c) in self.positions.iter().enumerate() {
             // Grab the current head position and increment its position into new_positions.
@@ -53,16 +44,16 @@ impl Snake {
 
                 match self.direction {
                     Directions::Up => {
-                        new_positions[0].y -= 1;
+                        new_positions[0].coords.y -= 1;
                     }
                     Directions::Down => {
-                        new_positions[0].y += 1;
+                        new_positions[0].coords.y += 1;
                     }
                     Directions::Left => {
-                        new_positions[0].x -= 1;
+                        new_positions[0].coords.x -= 1;
                     }
                     Directions::Right => {
-                        new_positions[0].x += 1;
+                        new_positions[0].coords.x += 1;
                     }
                     _ => {}
                 }
@@ -71,12 +62,12 @@ impl Snake {
             }
 
             // Don't process snake's inactive blocks.
-            if c.x == -1 || c.y == -1 {
+            if c.coords.x == -1 || c.coords.y == -1 {
                 continue;
             }
 
-            new_positions[i].x = self.positions[i - 1].x;
-            new_positions[i].y = self.positions[i - 1].y;
+            new_positions[i].coords.x = self.positions[i - 1].coords.x;
+            new_positions[i].coords.y = self.positions[i - 1].coords.y;
             new_positions[i].facing = self.positions[i - 1].facing;
         }
 
@@ -96,34 +87,33 @@ impl Snake {
             // todo: look into iter().enumerate()
             // Only continue if the previous x & y had values but the current does not.
             // This means we are at the tail.
-            if p.x == -1 && positions[i - 1].x != -1 && positions[i - 1].y != -1 {
+            if p.coords.x == -1
+                && positions[i - 1].coords.x != -1
+                && positions[i - 1].coords.y != -1
+            {
                 for j in 0..amount {
                     // Read the values of the tail so we know what the oritentation should be
                     // for the new one.
                     let previous_tail = positions[j + 1 - 1];
 
-                    let mut new_position = Coords {
-                        x: 1,
-                        y: 1,
-                        facing: previous_tail.facing,
-                    };
+                    let mut new_position = SnakeCoords::new(1, 1, previous_tail.facing);
 
                     match previous_tail.facing {
                         Directions::Up => {
-                            new_position.x = previous_tail.x;
-                            new_position.y = previous_tail.y + 1;
+                            new_position.coords.x = previous_tail.coords.x;
+                            new_position.coords.y = previous_tail.coords.y + 1;
                         }
                         Directions::Down => {
-                            new_position.x = previous_tail.x;
-                            new_position.y = previous_tail.y - 1;
+                            new_position.coords.x = previous_tail.coords.x;
+                            new_position.coords.y = previous_tail.coords.y - 1;
                         }
                         Directions::Left => {
-                            new_position.x = previous_tail.x + 1;
-                            new_position.y = previous_tail.y;
+                            new_position.coords.x = previous_tail.coords.x + 1;
+                            new_position.coords.y = previous_tail.coords.y;
                         }
                         Directions::Right => {
-                            new_position.x = previous_tail.x - 1;
-                            new_position.y = previous_tail.y;
+                            new_position.coords.x = previous_tail.coords.x - 1;
+                            new_position.coords.y = previous_tail.coords.y;
                         }
                         Directions::None => {}
                     }
@@ -159,29 +149,25 @@ mod tests {
     #[test]
     fn baby_snake_step() {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: Directions::None,
-            }; 20],
+            positions: [SnakeCoords::default(); 20],
             direction: Directions::Up,
             x_x: false,
         };
 
-        snake.positions[0].x = 5;
-        snake.positions[0].y = 5;
+        snake.positions[0].coords.x = 5;
+        snake.positions[0].coords.y = 5;
 
         snake.step();
 
         // Make sure only the head block has moved position.
         // Move is Up, which means up one line and so y decreases.
-        assert_eq!(snake.positions[0].x, 5);
-        assert_eq!(snake.positions[0].y, 4);
+        assert_eq!(snake.positions[0].coords.x, 5);
+        assert_eq!(snake.positions[0].coords.y, 4);
 
         // The rest of the body should be inactive.
         for i in 2..snake.positions.len() {
-            assert_eq!(snake.positions[i].x, -1);
-            assert_eq!(snake.positions[i].y, -1);
+            assert_eq!(snake.positions[i].coords.x, -1);
+            assert_eq!(snake.positions[i].coords.y, -1);
         }
     }
 
@@ -191,42 +177,38 @@ mod tests {
     #[test]
     fn teenager_snake_step_up() {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: Directions::None,
-            }; 20],
+            positions: [SnakeCoords::default(); 20],
             direction: Directions::Up,
             x_x: false,
         };
 
         for i in 0..13 {
-            snake.positions[i].x = 20;
-            snake.positions[i].y = (i as i16) + 10;
+            snake.positions[i].coords.x = 20;
+            snake.positions[i].coords.y = (i as i16) + 10;
         }
 
         // All snake positions after 13 should be inactive.
         for i in 13..snake.positions.len() {
-            assert_eq!(snake.positions[i].y, -1);
-            assert_eq!(snake.positions[i].x, -1);
+            assert_eq!(snake.positions[i].coords.y, -1);
+            assert_eq!(snake.positions[i].coords.x, -1);
         }
 
         snake.step();
 
         // The head should have moved one step up.
-        assert_eq!(snake.positions[0].x, 20);
-        assert_eq!(snake.positions[0].y, 9);
+        assert_eq!(snake.positions[0].coords.x, 20);
+        assert_eq!(snake.positions[0].coords.y, 9);
 
         // Check that the elements in the array have effectively all shifted down 1.
         for i in 2..13 {
-            assert_eq!(snake.positions[i].x, 20);
-            assert_eq!(snake.positions[i].y, (i as i16) + 9);
+            assert_eq!(snake.positions[i].coords.x, 20);
+            assert_eq!(snake.positions[i].coords.y, (i as i16) + 9);
         }
 
         // All snake positions after 13 should be inactive.
         for i in 13..snake.positions.len() {
-            assert_eq!(snake.positions[i].y, -1);
-            assert_eq!(snake.positions[i].x, -1);
+            assert_eq!(snake.positions[i].coords.y, -1);
+            assert_eq!(snake.positions[i].coords.x, -1);
         }
     }
 
@@ -235,17 +217,13 @@ mod tests {
     //
     fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
         let mut snake = Snake {
-            positions: [Coords {
-                x: -1,
-                y: -1,
-                facing: direction,
-            }; 20],
+            positions: [SnakeCoords::new(-1, -1, direction); 20],
             direction: direction,
             x_x: false,
         };
 
-        snake.positions[0].x = 10;
-        snake.positions[0].y = 10;
+        snake.positions[0].coords.x = 10;
+        snake.positions[0].coords.y = 10;
 
         snake.grow(grow_by);
 
@@ -259,14 +237,14 @@ mod tests {
     fn grow_amount_1_should_add_new_block_direction_up() {
         let snake = set_snake_and_grow(Directions::Up, 1);
 
-        assert_eq!(snake.positions[0].x, 10);
-        assert_eq!(snake.positions[0].y, 10);
+        assert_eq!(snake.positions[0].coords.x, 10);
+        assert_eq!(snake.positions[0].coords.y, 10);
 
-        assert_eq!(snake.positions[1].x, 10);
-        assert_eq!(snake.positions[1].y, 11);
+        assert_eq!(snake.positions[1].coords.x, 10);
+        assert_eq!(snake.positions[1].coords.y, 11);
 
-        assert_eq!(snake.positions[2].x, -1);
-        assert_eq!(snake.positions[2].y, -1);
+        assert_eq!(snake.positions[2].coords.x, -1);
+        assert_eq!(snake.positions[2].coords.y, -1);
     }
 
     //
@@ -276,14 +254,14 @@ mod tests {
     fn grow_amount_1_should_add_new_block_direction_down() {
         let snake = set_snake_and_grow(Directions::Down, 1);
 
-        assert_eq!(snake.positions[0].x, 10);
-        assert_eq!(snake.positions[0].y, 10);
+        assert_eq!(snake.positions[0].coords.x, 10);
+        assert_eq!(snake.positions[0].coords.y, 10);
 
-        assert_eq!(snake.positions[1].x, 10);
-        assert_eq!(snake.positions[1].y, 9);
+        assert_eq!(snake.positions[1].coords.x, 10);
+        assert_eq!(snake.positions[1].coords.y, 9);
 
-        assert_eq!(snake.positions[2].x, -1);
-        assert_eq!(snake.positions[2].y, -1);
+        assert_eq!(snake.positions[2].coords.x, -1);
+        assert_eq!(snake.positions[2].coords.y, -1);
     }
 
     //
@@ -293,14 +271,14 @@ mod tests {
     fn grow_amount_1_should_add_new_block_direction_left() {
         let snake = set_snake_and_grow(Directions::Left, 1);
 
-        assert_eq!(snake.positions[0].x, 10);
-        assert_eq!(snake.positions[0].y, 10);
+        assert_eq!(snake.positions[0].coords.x, 10);
+        assert_eq!(snake.positions[0].coords.y, 10);
 
-        assert_eq!(snake.positions[1].x, 11);
-        assert_eq!(snake.positions[1].y, 10);
+        assert_eq!(snake.positions[1].coords.x, 11);
+        assert_eq!(snake.positions[1].coords.y, 10);
 
-        assert_eq!(snake.positions[2].x, -1);
-        assert_eq!(snake.positions[2].y, -1);
+        assert_eq!(snake.positions[2].coords.x, -1);
+        assert_eq!(snake.positions[2].coords.y, -1);
     }
 
     //
@@ -310,42 +288,42 @@ mod tests {
     fn grow_amount_1_should_add_new_block_direction_right() {
         let snake = set_snake_and_grow(Directions::Right, 1);
 
-        assert_eq!(snake.positions[0].x, 10);
-        assert_eq!(snake.positions[0].y, 10);
+        assert_eq!(snake.positions[0].coords.x, 10);
+        assert_eq!(snake.positions[0].coords.y, 10);
 
-        assert_eq!(snake.positions[1].x, 9);
-        assert_eq!(snake.positions[1].y, 10);
+        assert_eq!(snake.positions[1].coords.x, 9);
+        assert_eq!(snake.positions[1].coords.y, 10);
 
-        assert_eq!(snake.positions[2].x, -1);
-        assert_eq!(snake.positions[2].y, -1);
+        assert_eq!(snake.positions[2].coords.x, -1);
+        assert_eq!(snake.positions[2].coords.y, -1);
     }
 
     #[test]
     fn grow_amount_6_should_add_new_block_direction_right() {
         let snake = set_snake_and_grow(Directions::Right, 6);
 
-        assert_eq!(snake.positions[0].x, 10);
-        assert_eq!(snake.positions[0].y, 10);
+        assert_eq!(snake.positions[0].coords.x, 10);
+        assert_eq!(snake.positions[0].coords.y, 10);
 
-        assert_eq!(snake.positions[1].x, 9);
-        assert_eq!(snake.positions[1].y, 10);
+        assert_eq!(snake.positions[1].coords.x, 9);
+        assert_eq!(snake.positions[1].coords.y, 10);
 
-        assert_eq!(snake.positions[2].x, 8);
-        assert_eq!(snake.positions[2].y, 10);
+        assert_eq!(snake.positions[2].coords.x, 8);
+        assert_eq!(snake.positions[2].coords.y, 10);
 
-        assert_eq!(snake.positions[3].x, 7);
-        assert_eq!(snake.positions[4].y, 10);
+        assert_eq!(snake.positions[3].coords.x, 7);
+        assert_eq!(snake.positions[4].coords.y, 10);
 
-        assert_eq!(snake.positions[4].x, 6);
-        assert_eq!(snake.positions[4].y, 10);
+        assert_eq!(snake.positions[4].coords.x, 6);
+        assert_eq!(snake.positions[4].coords.y, 10);
 
-        assert_eq!(snake.positions[5].x, 5);
-        assert_eq!(snake.positions[5].y, 10);
+        assert_eq!(snake.positions[5].coords.x, 5);
+        assert_eq!(snake.positions[5].coords.y, 10);
 
-        assert_eq!(snake.positions[6].x, 4);
-        assert_eq!(snake.positions[6].y, 10);
+        assert_eq!(snake.positions[6].coords.x, 4);
+        assert_eq!(snake.positions[6].coords.y, 10);
 
-        assert_eq!(snake.positions[7].x, -1);
-        assert_eq!(snake.positions[7].y, -1);
+        assert_eq!(snake.positions[7].coords.x, -1);
+        assert_eq!(snake.positions[7].coords.y, -1);
     }
 }

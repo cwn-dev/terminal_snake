@@ -6,7 +6,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 pub struct Random {
-    // We used a u128 seed here as that's compatible with epoch as nanoseconds.
     seed: u32,
 }
 
@@ -20,7 +19,7 @@ impl Random {
     //
     pub fn time_seed() -> Self {
         match SystemTime::now().duration_since(UNIX_EPOCH) {
-            Ok(n) => Random::new(n.subsec_nanos() / 10 ^ 9),
+            Ok(n) => Random::new((n.subsec_nanos() / 10) ^ 9),
             Err(_) => panic!("Your clock is broken, or something."),
         }
     }

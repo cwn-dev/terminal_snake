@@ -1,10 +1,12 @@
-use crate::{error::SnakeError, random::random::Random, state::arena::Arena};
+use crate::{
+    engine::coords::Coords, error::SnakeError, random::random::Random, state::arena::Arena,
+};
 
 use super::gamestate::GameState;
 
 #[derive(Debug)]
 pub struct Food {
-    pub positions: [(i16, i16); 3],
+    pub positions: [Coords; 3],
 }
 
 impl Food {
@@ -22,12 +24,13 @@ impl Food {
             .snake
             .positions
             .iter()
-            .any(|&pos| (pos.x == rand_cols && pos.y == rand_rows))
+            .any(|&pos| (pos.coords.x == rand_cols && pos.coords.y == rand_rows))
         {
             return Food::new_random(state, count);
         }
 
-        state.food.positions[0] = (rand_cols, rand_rows);
+        state.food.positions[0].x = rand_cols;
+        state.food.positions[0].y = rand_rows;
 
         Ok(state)
     }

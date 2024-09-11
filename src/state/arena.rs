@@ -1,11 +1,15 @@
-use crate::{engine::unicode::Unicode, error::SnakeError, terminal::terminal::Terminal};
+use crate::{
+    engine::{coords::Coords, unicode::Unicode},
+    error::SnakeError,
+    terminal::terminal::Terminal,
+};
 
 use super::gamestate::GameState;
 
 #[derive(Debug)]
 pub struct Arena {
     // x, y, character
-    pub positions: Vec<(u16, u16, Unicode)>,
+    pub positions: Vec<(Coords, Unicode)>,
 }
 
 impl Arena {
@@ -18,8 +22,8 @@ impl Arena {
     pub fn create_level_1(mut state: GameState) -> GameState {
         let (cols, rows) = Terminal::get_console_size();
 
-        let cols = cols / 2;
-        let rows = rows / 2;
+        let cols = (cols / 2) as i16;
+        let rows = (rows / 2) as i16;
 
         // Todo: we need some way of tracking where other blocks have been drawn on
         // so we don't have to manually track stuff like this starting on row 3...
@@ -28,30 +32,30 @@ impl Arena {
         state
             .arena
             .positions
-            .push((cols - 1, 3, Unicode::BoxLightArcDownAndLeft));
+            .push((Coords::new(cols - 1, 3), Unicode::BoxLightArcDownAndLeft));
+        state.arena.positions.push((
+            Coords::new(cols - 1, rows - 1),
+            Unicode::BoxLightArcUpAndLeft,
+        ));
         state
             .arena
             .positions
-            .push((cols - 1, rows - 1, Unicode::BoxLightArcUpAndLeft));
+            .push((Coords::new(1, rows - 1), Unicode::BoxLightArcUpAndRight));
         state
             .arena
             .positions
-            .push((1, rows - 1, Unicode::BoxLightArcUpAndRight));
-        state
-            .arena
-            .positions
-            .push((1, 3, Unicode::BoxLightArcDownAndRight));
+            .push((Coords::new(1, 3), Unicode::BoxLightArcDownAndRight));
 
         // Top and bottom lines
         for i in 2..cols - 1 {
             state
                 .arena
                 .positions
-                .push((i, 3, Unicode::BoxLightHorizontal));
+                .push((Coords::new(i, 3), Unicode::BoxLightHorizontal));
             state
                 .arena
                 .positions
-                .push((i, rows - 1, Unicode::BoxLightHorizontal));
+                .push((Coords::new(i, rows - 1), Unicode::BoxLightHorizontal));
         }
 
         // Right and left lines
@@ -59,11 +63,11 @@ impl Arena {
             state
                 .arena
                 .positions
-                .push((cols - 1, i, Unicode::BoxLightVertical));
+                .push((Coords::new(cols - 1, i), Unicode::BoxLightVertical));
             state
                 .arena
                 .positions
-                .push((1, i, Unicode::BoxLightVertical));
+                .push((Coords::new(1, i), Unicode::BoxLightVertical));
         }
 
         state
@@ -87,13 +91,27 @@ impl Arena {
     }
 
     fn max_x(arena: &Arena) -> Result<u16, SnakeError> {
-        // todo: remove unwraps.  Was testing. Alternative at the time was insanity
-        Ok(arena.positions.iter().map(|pos| (pos.0)).max().unwrap())
+        match arena
+            .positions
+            .iter()
+            .map(|pos| pos.0.to_unsigned_tuple().0)
+            .max()
+        {
+            Some(n) => Ok(n),
+            None => Err(SnakeError),
+        }
     }
 
     fn max_y(arena: &Arena) -> Result<u16, SnakeError> {
-        // todo: remove unwraps.  Was testing. Alternative at the time was insanity
-        Ok(arena.positions.iter().map(|pos| (pos.1)).max().unwrap())
+        match arena
+            .positions
+            .iter()
+            .map(|pos| pos.0.to_unsigned_tuple().1)
+            .max()
+        {
+            Some(n) => Ok(n),
+            None => Err(SnakeError),
+        }
     }
 }
 

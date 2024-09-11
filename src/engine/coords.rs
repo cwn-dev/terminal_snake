@@ -1,19 +1,12 @@
-use super::directions::Directions;
-
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Coords {
     pub x: i16,
     pub y: i16,
-    // Todo: I'm not sure anymore if we should have directions in here
-    // If we move it, then we can use Coords everywhere rather than the tuples.
-    // We probably need another struct which has Coords + facing which is
-    // only used for Snake.
-    pub facing: Directions,
 }
 
 impl Coords {
-    fn new(x: i16, y: i16, facing: Directions) -> Self {
-        Coords { x, y, facing }
+    pub fn new(x: i16, y: i16) -> Self {
+        Coords { x, y }
     }
 
     /// Converts x and y in the given `Coords` struct to unsigned.
@@ -39,7 +32,7 @@ impl Coords {
 
 impl Default for Coords {
     fn default() -> Self {
-        Coords::new(-1, -1, Directions::None)
+        Coords::new(-1, -1)
     }
 }
 
@@ -49,31 +42,22 @@ mod tests {
 
     #[test]
     pub fn to_unsigned_tuple_returns_correct_coords() {
-        let coords = Coords {
-            x: 5,
-            y: 5,
-            facing: Directions::Up,
-        };
+        let coords = Coords { x: 5, y: 5 };
+
         assert_eq!(coords.to_unsigned_tuple(), (5, 5));
     }
 
     #[test]
     pub fn to_unsigned_tuple_returns_x0_y0_if_minus_1() {
-        let coords = Coords {
-            x: -1,
-            y: -1,
-            facing: Directions::Up,
-        };
+        let coords = Coords { x: -1, y: -1 };
+
         assert_eq!(coords.to_unsigned_tuple(), (0, 0));
     }
 
     #[test]
     pub fn to_unsigned_tuple_returns_x0_y0_if_signed() {
-        let coords = Coords {
-            x: -42,
-            y: -42,
-            facing: Directions::Up,
-        };
+        let coords = Coords { x: -42, y: -42 };
+
         assert_eq!(coords.to_unsigned_tuple(), (0, 0));
     }
 }

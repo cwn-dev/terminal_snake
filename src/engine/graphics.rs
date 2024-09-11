@@ -37,7 +37,7 @@ impl Graphics {
 
     // Todo: need to remove facing from Coords, then use Coords everywhere
     // rather than x,y tuples or vars. Then I will implement the function
-    // below inside Coords so we can call Coords::valid() or something. 
+    // below inside Coords so we can call Coords::valid() or something.
     // fn is_valid(&self) -> Result<bool, SnengineError> {
     //     if self.y == 0 || self.x == 0 {
     //         return Err(SnengineError::new(

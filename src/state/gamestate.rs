@@ -1,3 +1,5 @@
+use crate::engine::coords::Coords;
+
 use super::arena::Arena;
 use super::food::Food;
 use super::snake::Snake;
@@ -15,7 +17,7 @@ impl GameState {
         GameState {
             snake: Snake::new(),
             food: Food {
-                positions: [(-1, -1); 3],
+                positions: [Coords::new(-1, -1); 3],
             },
             arena: Arena::new(),
             score: 0,
