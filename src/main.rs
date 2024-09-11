@@ -206,7 +206,15 @@ fn main() {
     println!("\x1b[38;2;0;72;186;48;2;255;255;255mWelcome to terminal_snake\x1b[0m");
     println!("Press any key to start");
 
-    // Todo: get the current console size and store it in the game state.
+    // Todo: we have an inefficiency here where the game will sit idle
+    // on the 'welcome' screen taking CPU.  This is because the loop starts
+    // regardless of whether or not the user has pressed a button. Ultimately
+    // we want to show a start button and the result of that function would
+    // start the game loop. To be honest, it might be that we want the loop
+    // to start regardless if we have a good looking start screen, it might
+    // have animation or at minimum a Start, Options and Exit buttons which
+    // would highlight on select, meaning there would need to be some kind of
+    // loop.
 
     match game_loop(file) {
         Ok(g) => {
