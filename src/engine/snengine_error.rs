@@ -1,5 +1,6 @@
 use std::{error::Error, fmt};
 
+#[derive(PartialEq)]
 pub struct SnengineError {
     message: String,
 }
