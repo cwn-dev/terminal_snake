@@ -25,7 +25,7 @@ impl Graphics {
     pub fn write(x: u16, y: u16, text: String) -> Result<(), SnengineError> {
         if y == 0 || x == 0 {
             return Err(SnengineError::new(
-                format!("Cannot draw at {}, {}", x, y).as_str(),
+                format!("Cannot write at {}, {}", x, y).as_str(),
             ));
         }
 
@@ -71,6 +71,27 @@ mod tests {
     pub fn draw_char_error_if_x_and_y_0() {
         let result = Graphics::draw_char(0, 0, Unicode::Space);
         let expected = Err(SnengineError::new("Cannot draw at 0, 0"));
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn write_error_if_x_and_y_0() {
+        let result = Graphics::write(0, 0, String::from("Hello"));
+        let expected = Err(SnengineError::new("Cannot write at 0, 0"));
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn write_error_if_y_0() {
+        let result = Graphics::write(42, 0, String::from("Hello"));
+        let expected = Err(SnengineError::new("Cannot write at 42, 0"));
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn write_error_if_x_0() {
+        let result = Graphics::write(0, 42, String::from("Hello"));
+        let expected = Err(SnengineError::new("Cannot write at 0, 42"));
         assert_eq!(result, expected);
     }
 }
