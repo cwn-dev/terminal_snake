@@ -1,3 +1,7 @@
+use std::error::Error;
+
+use crate::engine::{graphics::Graphics, unicode::Unicode};
+
 use super::{directions::Directions, snake_coords::SnakeCoords};
 
 #[derive(Debug)]
@@ -128,6 +132,51 @@ impl Snake {
         self.positions = positions;
 
         self
+    }
+
+    //
+    // Loops through each snake position and draws a space to clear it.
+    //
+    pub fn clear(&self) -> Result<(), Box<dyn Error>> {
+        for (i, p) in self.positions.iter().enumerate() {
+            // Clear all positions that don't have a facing or have and invalid position.
+            // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
+            // Todo: add an is_valid() to Coords so we don't have to keep repeating this.
+            if p.facing == Directions::None && (p.coords.x == -1 || p.coords.y == -1) && i > 0 {
+                continue;
+            }
+
+            let (ux, uy) = p.coords.to_unsigned_tuple();
+
+            Graphics::draw_char(ux, uy, Unicode::Space)?;
+        }
+
+        Ok(())
+    }
+
+    //
+    // Returns the number of active (x & y > -1, with a direction) blocks in Snake.
+    //
+    pub fn active_length(&self) -> Option<usize> {
+        let active_pos = self
+            .positions
+            .iter()
+            .filter(|p| p.coords.x != -1 && p.coords.y != -1 && p.facing != Directions::None)
+            .count();
+        match active_pos {
+            1.. => Some(active_pos),
+            0 => None,
+        }
+    }
+
+    //
+    // Returns true if Snake has at least 1 active block.
+    //
+    pub fn is_active(&self) -> bool {
+        match self.active_length() {
+            Some(_) => true,
+            None => false,
+        }
     }
 }
 
