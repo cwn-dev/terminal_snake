@@ -10,43 +10,32 @@ impl Graphics {
         // game & engine, which is better than having to calling get_console_size
         // all the time.
 
-        if y == 0 || x == 0 {
-            return Err(SnengineError::new(
-                format!("Cannot draw at {}, {}", x, y).as_str(),
-            ));
+        if Graphics::is_valid(x, y)? {
+            print!("\x1b[{};{}f", y, x);
+            print!("{}", char.to_char());
         }
-
-        print!("\x1b[{};{}f", y, x);
-        print!("{}", char.to_char());
 
         Ok(())
     }
 
     pub fn write(x: u16, y: u16, text: String) -> Result<(), SnengineError> {
-        if y == 0 || x == 0 {
-            return Err(SnengineError::new(
-                format!("Cannot write at {}, {}", x, y).as_str(),
-            ));
+        if Graphics::is_valid(x, y)? {
+            print!("\x1b[{};{}f", y, x);
+            print!("{}", text);
         }
-
-        print!("\x1b[{};{}f", y, x);
-        print!("{}", text);
 
         Ok(())
     }
 
-    // Todo: need to remove facing from Coords, then use Coords everywhere
-    // rather than x,y tuples or vars. Then I will implement the function
-    // below inside Coords so we can call Coords::valid() or something.
-    // fn is_valid(&self) -> Result<bool, SnengineError> {
-    //     if self.y == 0 || self.x == 0 {
-    //         return Err(SnengineError::new(
-    //             format!("Cannot draw at {}, {}", x, y).as_str(),
-    //         ));
-    //     }
+    fn is_valid(x: u16, y: u16) -> Result<bool, SnengineError> {
+        if x == 0 || y == 0 {
+            return Err(SnengineError::new(
+                format!("Cannot draw at {}, {}", x, y).as_str(),
+            ));
+        }
 
-    //     Ok(())
-    // }
+        Ok(true)
+    }
 }
 
 #[cfg(test)]
@@ -77,21 +66,42 @@ mod tests {
     #[test]
     pub fn write_error_if_x_and_y_0() {
         let result = Graphics::write(0, 0, String::from("Hello"));
-        let expected = Err(SnengineError::new("Cannot write at 0, 0"));
+        let expected = Err(SnengineError::new("Cannot draw at 0, 0"));
         assert_eq!(result, expected);
     }
 
     #[test]
     pub fn write_error_if_y_0() {
         let result = Graphics::write(42, 0, String::from("Hello"));
-        let expected = Err(SnengineError::new("Cannot write at 42, 0"));
+        let expected = Err(SnengineError::new("Cannot draw at 42, 0"));
         assert_eq!(result, expected);
     }
 
     #[test]
     pub fn write_error_if_x_0() {
         let result = Graphics::write(0, 42, String::from("Hello"));
-        let expected = Err(SnengineError::new("Cannot write at 0, 42"));
+        let expected = Err(SnengineError::new("Cannot draw at 0, 42"));
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn is_valid_return_true_if_x_and_y_not_0() {
+        let result = Graphics::is_valid(1, 1);
+        let expected = Ok(true);
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn is_valid_return_false_if_x_0() {
+        let result = Graphics::is_valid(0, 1);
+        let expected = Err(SnengineError::new("Cannot draw at 0, 1"));
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    pub fn is_valid_return_false_if_y_0() {
+        let result = Graphics::is_valid(1, 0);
+        let expected = Err(SnengineError::new("Cannot draw at 1, 0"));
         assert_eq!(result, expected);
     }
 }
