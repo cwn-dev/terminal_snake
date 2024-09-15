@@ -36,21 +36,9 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
         return Ok(state);
     }
 
-    // Clear the old snake
-    for (i, p) in state.snake.positions.iter().enumerate() {
-        // Clear all positions that don't have a facing or have and invalid position.
-        // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
-        // Todo: add an is_valid() to Coords so we don't have to keep repeating this.
-        if p.facing == Directions::None && (p.coords.x == -1 || p.coords.y == -1) && i > 0 {
-            continue;
-        }
-
-        let (ux, uy) = p.coords.to_unsigned_tuple();
-
-        Graphics::draw_char(ux, uy, Unicode::Space)?;
-    }
-
+    state.snake.clear()?;
     state.snake.step();
+
     let mut snake_eaten = false;
 
     // Draw the new snake
