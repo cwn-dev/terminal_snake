@@ -28,6 +28,20 @@ impl Coords {
             (_, _) => (self.x.try_into().unwrap(), self.y.try_into().unwrap()),
         }
     }
+
+    /// Returns true if the given x and y are both greater than -1.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use terminal_snake::engine::coords::Coords;
+    ///
+    /// let coords = Coords::new(-1, -1);
+    /// assert_eq!(coords.is_active(), false);
+    /// ```
+    pub fn is_active(&self) -> bool {
+        self.x > -1 && self.y > -1
+    }
 }
 
 impl Default for Coords {
@@ -59,5 +73,29 @@ mod tests {
         let coords = Coords { x: -42, y: -42 };
 
         assert_eq!(coords.to_unsigned_tuple(), (0, 0));
+    }
+
+    #[test]
+    pub fn is_active_return_true_if_above_minus_1() {
+        let coords = Coords::new(1, 1);
+        assert_eq!(coords.is_active(), true);
+    }
+
+    #[test]
+    pub fn is_active_return_true_if_0() {
+        let coords = Coords::new(0, 0);
+        assert_eq!(coords.is_active(), true);
+    }
+
+    #[test]
+    pub fn is_active_return_false_if_minus_1() {
+        let coords = Coords::new(-1, -1);
+        assert_eq!(coords.is_active(), false);
+    }
+
+    #[test]
+    pub fn is_active_return_false_if_below_minus_1() {
+        let coords = Coords::new(-42, -44);
+        assert_eq!(coords.is_active(), false);
     }
 }

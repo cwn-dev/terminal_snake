@@ -66,7 +66,7 @@ impl Snake {
             }
 
             // Don't process snake's inactive blocks.
-            if c.coords.x == -1 || c.coords.y == -1 {
+            if !c.coords.is_active() {
                 continue;
             }
 
@@ -88,13 +88,9 @@ impl Snake {
         let mut positions = self.positions;
 
         for (i, p) in self.positions.iter().enumerate() {
-            // todo: look into iter().enumerate()
-            // Only continue if the previous x & y had values but the current does not.
-            // This means we are at the tail.
-            if p.coords.x == -1
-                && positions[i - 1].coords.x != -1
-                && positions[i - 1].coords.y != -1
-            {
+            // Skip if the previous position did not have valid coords but
+            // the current does. This means we are at the tail.
+            if !p.coords.is_active() && positions[i - 1].coords.is_active() {
                 for j in 0..amount {
                     // Read the values of the tail so we know what the oritentation should be
                     // for the new one.
@@ -130,7 +126,6 @@ impl Snake {
         }
 
         self.positions = positions;
-
         self
     }
 
@@ -141,8 +136,7 @@ impl Snake {
         for (i, p) in self.positions.iter().enumerate() {
             // Clear all positions that don't have a facing or have and invalid position.
             // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
-            // Todo: add an is_valid() to Coords so we don't have to keep repeating this.
-            if p.facing == Directions::None && (p.coords.x == -1 || p.coords.y == -1) && i > 0 {
+            if p.facing == Directions::None && !p.coords.is_active() && i > 0 {
                 continue;
             }
 
@@ -161,7 +155,7 @@ impl Snake {
         let active_pos = self
             .positions
             .iter()
-            .filter(|p| p.coords.x != -1 && p.coords.y != -1 && p.facing != Directions::None)
+            .filter(|p| p.coords.is_active() && p.facing != Directions::None)
             .count();
         match active_pos {
             1.. => Some(active_pos),

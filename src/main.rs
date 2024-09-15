@@ -27,7 +27,7 @@ pub mod terminal;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
     // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
-    if state.snake.positions[0].coords.x == -1 || state.snake.positions[0].coords.y == -1 {
+    if !state.snake.positions[0].coords.is_active() {
         let (x_middle, y_middle) = Arena::middle_coords(&state.arena)?;
 
         state.snake.positions[0].coords.x = x_middle as i16;
@@ -132,7 +132,7 @@ fn draw_score(state: &GameState) -> Result<(), SnengineError> {
 
 fn draw_food(state: &GameState) -> Result<(), SnengineError> {
     for c in state.food.positions {
-        if c.x == -1 || c.y == -1 {
+        if !c.is_active() {
             continue;
         }
 
