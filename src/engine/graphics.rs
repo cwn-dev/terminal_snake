@@ -67,21 +67,21 @@ mod tests {
 
     #[test]
     pub fn write_error_if_x_and_y_0() {
-        let result = Graphics::write(0, 0, String::from("Hello"));
+        let result = Graphics::write(0, 0, "Hello");
         let expected = Err(SnengineError::new("Cannot draw at 0, 0"));
         assert_eq!(result, expected);
     }
 
     #[test]
     pub fn write_error_if_y_0() {
-        let result = Graphics::write(42, 0, String::from("Hello"));
+        let result = Graphics::write(42, 0, "Hello");
         let expected = Err(SnengineError::new("Cannot draw at 42, 0"));
         assert_eq!(result, expected);
     }
 
     #[test]
     pub fn write_error_if_x_0() {
-        let result = Graphics::write(0, 42, String::from("Hello"));
+        let result = Graphics::write(0, 42, "Hello");
         let expected = Err(SnengineError::new("Cannot draw at 0, 42"));
         assert_eq!(result, expected);
     }
