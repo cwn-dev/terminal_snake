@@ -1,7 +1,6 @@
 use crate::{
     engine::{coords::Coords, unicode::Unicode},
     error::SnakeError,
-    terminal::terminal::Terminal,
 };
 
 use super::gamestate::GameState;
@@ -20,7 +19,7 @@ impl Arena {
     }
 
     pub fn create_level_1(mut state: GameState) -> GameState {
-        let (cols, rows) = Terminal::get_console_size();
+        let (cols, rows) = state.c_dimensions.to_unsigned_tuple();
 
         let cols = (cols / 2) as i16;
         let rows = (rows / 2) as i16;

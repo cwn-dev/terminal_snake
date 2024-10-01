@@ -10,6 +10,7 @@ pub struct GameState {
     pub food: Food,
     pub arena: Arena,
     pub score: i16,
+    pub c_dimensions: Coords, // console dimensions
 }
 
 impl GameState {
@@ -21,6 +22,7 @@ impl GameState {
             },
             arena: Arena::new(),
             score: 0,
+            c_dimensions: Coords::new(0, 0),
         }
     }
 }

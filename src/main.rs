@@ -125,7 +125,7 @@ fn draw_arena(state: &GameState) -> Result<(), SnengineError> {
 }
 
 fn draw_score(state: &GameState) -> Result<(), SnengineError> {
-    let (cols, _) = Terminal::get_console_size();
+    let (cols, _) = state.c_dimensions.to_unsigned_tuple();
 
     Graphics::write(cols - 1, 2, state.score.to_string())
 }
@@ -147,6 +147,10 @@ fn draw_food(state: &GameState) -> Result<(), SnengineError> {
 fn game_loop(file: File) -> Result<GameState, Box<dyn Error>> {
     // Todo: move this out of game_loop and put into init() or main().
     let mut state = GameState::new();
+
+    // Save the current console size to GameState for easy access.
+    let (c_x, c_y) = Terminal::get_console_size();
+    state.c_dimensions = Coords::new(c_x as i16, c_y as i16);
 
     state = Arena::create_level_1(state);
     state = Food::new_random(state, 1)?;

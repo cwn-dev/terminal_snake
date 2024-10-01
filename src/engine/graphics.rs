@@ -6,9 +6,11 @@ impl Graphics {
     pub fn draw_char(x: u16, y: u16, char: Unicode) -> Result<(), SnengineError> {
         // todo: should I implement a check to ensure we don't
         // draw outside the available terminal area?
-        // Get and cache the terminal size on startup. This can be used by the
-        // game & engine, which is better than having to calling get_console_size
-        // all the time.
+        // Best solution to this I think would be to have a
+        // function which runs on startup of the game and
+        // checks the terminal size to make sure it can
+        // run the game + it can store the terminal size
+        // in memory somewhere, then we can put the check in.
 
         if Graphics::is_valid(x, y)? {
             print!("\x1b[{};{}f", y, x);
