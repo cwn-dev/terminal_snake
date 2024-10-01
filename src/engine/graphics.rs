@@ -20,7 +20,7 @@ impl Graphics {
         Ok(())
     }
 
-    pub fn write(x: u16, y: u16, text: String) -> Result<(), SnengineError> {
+    pub fn write(x: u16, y: u16, text: &str) -> Result<(), SnengineError> {
         if Graphics::is_valid(x, y)? {
             print!("\x1b[{};{}f", y, x);
             print!("{}", text);
