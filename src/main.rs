@@ -127,7 +127,7 @@ fn draw_arena(state: &GameState) -> Result<(), SnengineError> {
 fn draw_score(state: &GameState) -> Result<(), SnengineError> {
     let (cols, _) = state.c_dimensions.to_unsigned_tuple();
 
-    Graphics::write(cols - 1, 2, state.score.to_string())
+    Graphics::write(cols - 1, 2, &state.score.to_string())
 }
 
 fn draw_food(state: &GameState) -> Result<(), SnengineError> {
@@ -139,6 +139,28 @@ fn draw_food(state: &GameState) -> Result<(), SnengineError> {
         let (x, y) = c.to_unsigned_tuple();
 
         Graphics::draw_char(x, y, Unicode::HeavyCircleWithCircleInside)?
+    }
+
+    Ok(())
+}
+
+fn draw_diags(state: &GameState) -> Result<(), SnengineError> {
+    // We'll draw the diagnostic output on the bottom row.
+    let (c_x, c_y) = state.c_dimensions.to_unsigned_tuple();
+
+    for i in 1..c_x {
+        Graphics::draw_char(i, c_y, Unicode::Space)?;
+    }
+
+    // Displays `Facing: Up`
+    Graphics::write(
+        1,
+        c_y,
+        format!("Current facing: {:?}", state.snake.direction).as_str(),
+    )?;
+
+    for i in 1..c_x {
+        Graphics::draw_char(i, c_y - 1, Unicode::BoxLightHorizontal)?;
     }
 
     Ok(())
@@ -163,6 +185,7 @@ fn game_loop(file: File) -> Result<GameState, Box<dyn Error>> {
         state = InputHandler::handle_input(state, &file);
         draw_arena(&state)?;
         draw_score(&state)?;
+        draw_diags(&state)?;
 
         if state.snake.x_x {
             break;
