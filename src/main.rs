@@ -208,11 +208,7 @@ fn main() {
     let original_term = Terminal::set_raw_mode();
     let file = Terminal::set_non_blocking_stdin();
 
-    // Clear the screen
-    print!("\x1b[2J");
-
-    // Move to 0
-    print!("\x1b[H");
+    Graphics::clear_screen();
 
     // Hide the cursor
     print!("\x1b[?25l");
@@ -233,15 +229,11 @@ fn main() {
 
     match game_loop(file) {
         Ok(g) => {
-            // todo: clear screen function here.
-            print!("\x1b[H");
-            print!("\x1b[2J");
+            Graphics::clear_screen();
             println!("x_x you died. You got {}...", g.score);
         }
         Err(e) => {
-            // todo: clear screen function here.
-            print!("\x1b[H");
-            print!("\x1b[2J");
+            Graphics::clear_screen();
 
             println!("{}", e);
         }

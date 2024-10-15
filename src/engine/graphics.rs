@@ -29,6 +29,11 @@ impl Graphics {
         Ok(())
     }
 
+    pub fn clear_screen() {
+        print!("\x1b[H"); // move cursor to top left
+        print!("\x1b[2J"); // clear screen
+    }
+
     fn is_valid(x: u16, y: u16) -> Result<bool, SnengineError> {
         if x == 0 || y == 0 {
             return Err(SnengineError::new(
