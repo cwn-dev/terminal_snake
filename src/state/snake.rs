@@ -174,6 +174,7 @@ impl Snake {
     // Returns true if Snake's head block has hit any part of his body.
     //
     pub fn has_hit_self(&self) -> bool {
+        // Skip the head piece, otherwise this always returns true.
         let has_match = &self.positions[1..]
             .iter()
             .position(|p| p.coords == self.positions[0].coords);
