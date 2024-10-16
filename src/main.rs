@@ -7,6 +7,7 @@ use engine::unicode::Unicode;
 use libc::{tcsetattr, termios, STDIN_FILENO, TCSANOW};
 use state::arena::Arena;
 use state::food::Food;
+use state::snake::Snake;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
@@ -47,6 +48,10 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
 
         if x == 0 || y == 0 {
             continue;
+        }
+
+        if Snake::has_hit_self(&state.snake) {
+            state.snake.x_x = true;
         }
 
         // Did we eat something?

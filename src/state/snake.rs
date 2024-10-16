@@ -167,10 +167,18 @@ impl Snake {
     // Returns true if Snake has at least 1 active block.
     //
     pub fn is_active(&self) -> bool {
-        match self.active_length() {
-            Some(_) => true,
-            None => false,
-        }
+        self.active_length().is_some()
+    }
+
+    //
+    // Returns true if Snake's head block has hit any part of his body.
+    //
+    pub fn has_hit_self(&self) -> bool {
+        let has_match = &self.positions[1..]
+            .iter()
+            .position(|p| p.coords == self.positions[0].coords);
+
+        has_match.is_some()
     }
 }
 
@@ -182,6 +190,8 @@ impl Default for Snake {
 
 #[cfg(test)]
 mod tests {
+    use crate::engine::coords::Coords;
+
     use super::*;
 
     // Todo: test steps + facing changes (turns)
@@ -341,6 +351,9 @@ mod tests {
         assert_eq!(snake.positions[2].coords.y, -1);
     }
 
+    //
+    // Check new snake position is in the right place when tail is facing right, more blocks.
+    //
     #[test]
     fn grow_amount_6_should_add_new_block_direction_right() {
         let snake = set_snake_and_grow(Directions::Right, 6);
@@ -368,5 +381,37 @@ mod tests {
 
         assert_eq!(snake.positions[7].coords.x, -1);
         assert_eq!(snake.positions[7].coords.y, -1);
+    }
+
+    //
+    // If the head block intersects any of the body, has_hit_self should return true.
+    //
+    #[test]
+    fn has_hit_self_return_true() {
+        let mut snake = Snake::new();
+        snake.direction = Directions::Down;
+        snake.positions[0].facing = Directions::Down;
+        snake.positions[0].coords = Coords::new(5, 10);
+        snake.grow(5);
+
+        snake.positions[0].coords = Coords::new(5, 7);
+
+        assert_eq!(true, Snake::has_hit_self(&snake));
+    }
+
+    //
+    // Make sure has_hit_self returns false if the head does not intersect the body
+    //
+    #[test]
+    fn has_hit_self_return_false() {
+        let mut snake = Snake::new();
+        snake.direction = Directions::Down;
+        snake.positions[0].facing = Directions::Down;
+        snake.positions[0].coords = Coords::new(5, 10);
+        snake.grow(5);
+
+        snake.positions[0].coords = Coords::new(5, 11);
+
+        assert_eq!(false, Snake::has_hit_self(&snake));
     }
 }

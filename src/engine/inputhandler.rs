@@ -65,7 +65,7 @@ impl InputHandler {
  * going back on themselves.  This logic should be moved out of here into a
  * game input handler which performs these checks and does whatever is
  * necessary. That way the engine stays clean.
- * 
+ *
  * Additionally, a cool Becca feature: instead of stopping user going back on
  * themselves, if they do, could the snake just loop back on itself. Would
  * it go up on Y or down on Y when it backtracks left and right...?
