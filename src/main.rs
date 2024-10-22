@@ -38,7 +38,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
     }
 
     state.snake.clear()?;
-    state.snake.step();
+    //state.snake.step(); // todo: this line was why snake was dying instantly. On new game, draw_snake steps the snake which creates the head block which is how we worked it pre-vector. so step needs to be later now, and also not called on new game
 
     let mut snake_eaten = false;
 
@@ -234,7 +234,7 @@ fn main() {
 
     match game_loop(file) {
         Ok(g) => {
-            Graphics::clear_screen();
+            //Graphics::clear_screen();
             println!("x_x you died. You got {}...", g.score);
         }
         Err(e) => {
