@@ -40,7 +40,8 @@ impl Snake {
         let current_head = self.positions[0];
         //let mut new_positions: [SnakeCoords; 20] = [SnakeCoords::default(); 20];
 
-        let mut new_positions: Vec<SnakeCoords> = vec![SnakeCoords::default(); self.positions.len() + 1];
+        let mut new_positions: Vec<SnakeCoords> =
+            vec![SnakeCoords::default(); self.positions.len()];
 
         for i in 0..new_positions.len() {
             // Grab the current head position and increment its position into new_positions.
@@ -88,12 +89,12 @@ impl Snake {
     // Todo: when Snake grows, really he should grow the positions array. Currently it's fixed.
     //
     pub fn grow(&mut self, amount: usize) -> &mut Snake {
-        for a in 0..amount {            
+        for a in 0..amount {
             // Read the values of the tail so we know what the oritentation should be
             // for the new one.
             let previous_tail = self.positions[a + 1 - 1];
 
-            let mut new_position = SnakeCoords::new(1, 1, previous_tail.facing);
+            let mut new_position = SnakeCoords::new(1, 1, previous_tail.facing, true);
 
             match previous_tail.facing {
                 Directions::Up => {
@@ -128,7 +129,7 @@ impl Snake {
         for (i, p) in self.positions.iter().enumerate() {
             // Clear all positions that don't have a facing or have and invalid position.
             // Always clear i when i is 0 as we want to make sure the starting piece is cleared.
-            if p.facing == Directions::None && !p.coords.is_active() && i > 0 {
+            if p.facing == Directions::None && !p.active && i > 0 {
                 continue;
             }
 
@@ -147,7 +148,7 @@ impl Snake {
         let active_pos = self
             .positions
             .iter()
-            .filter(|p| p.coords.is_active() && p.facing != Directions::None)
+            .filter(|p| p.active && p.facing != Directions::None)
             .count();
         match active_pos {
             1.. => Some(active_pos),
@@ -167,11 +168,11 @@ impl Snake {
     //
     pub fn has_hit_self(&self) -> bool {
         // Skip the head piece, otherwise this always returns true.
-        let has_match = &self.positions[1..]
+        let exists = self.positions[1..]
             .iter()
-            .position(|p| p.coords == self.positions[0].coords);
+            .any(|p| p.coords == self.positions[0].coords);
 
-        has_match.is_some()
+        exists && self.positions.len() > 1
     }
 }
 
@@ -188,6 +189,7 @@ mod tests {
     use super::*;
 
     // Todo: test steps + facing changes (turns)
+    // Todo: make sure snake position vector is not growing on step
 
     //
     // Tests a new, baby snake's forward steps.
@@ -195,7 +197,7 @@ mod tests {
     #[test]
     fn baby_snake_step() {
         let mut snake = Snake {
-            positions: vec![SnakeCoords::new(-1, -1, Directions::None)],
+            positions: vec![SnakeCoords::new(-1, -1, Directions::None, false)],
             direction: Directions::Up,
             x_x: false,
         };
@@ -229,7 +231,9 @@ mod tests {
         };
 
         for i in 0..13 {
-            snake.positions.push(SnakeCoords::new(20, (i as i16) + 10, Directions::Up));
+            snake
+                .positions
+                .push(SnakeCoords::new(20, (i as i16) + 10, Directions::Up, true));
         }
 
         snake.step();
@@ -253,7 +257,7 @@ mod tests {
     //
     fn set_snake_and_grow(direction: Directions, grow_by: usize) -> Snake {
         let mut snake = Snake {
-            positions: vec![SnakeCoords::new(10, 10, direction)],
+            positions: vec![SnakeCoords::new(10, 10, direction, true)],
             direction: direction,
             x_x: false,
         };
@@ -355,7 +359,7 @@ mod tests {
     fn has_hit_self_return_true() {
         let mut snake = Snake::new();
         snake.direction = Directions::Down;
-        snake.positions = vec![SnakeCoords::new(5, 10, Directions::Down)];
+        snake.positions = vec![SnakeCoords::new(5, 10, Directions::Down, true)];
 
         snake.grow(5);
 
@@ -371,7 +375,7 @@ mod tests {
     fn has_hit_self_return_false() {
         let mut snake = Snake::new();
         snake.direction = Directions::Down;
-        snake.positions = vec![SnakeCoords::new(5, 10, Directions::Down)];
+        snake.positions = vec![SnakeCoords::new(5, 10, Directions::Down, true)];
 
         snake.grow(5);
 

@@ -27,18 +27,26 @@ pub mod state;
 pub mod terminal;
 
 fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
-    // If snake's head is at -1, -1 then this is a new game, so put snake in the middle
-    if !state.snake.positions[0].coords.is_active() {
+    /*
+     * If the direction of the snake is something other than None, it should be
+     * moving, so mark the head block as active!
+     */
+    if state.snake.direction != Directions::None {
+        state.snake.positions[0].active = true;
+    }
+
+    // If snake's head is not active then this is a new game, so put snake in the middle
+    if !state.snake.positions[0].active {
         let (x_middle, y_middle) = Arena::middle_coords(&state.arena)?;
 
         state.snake.positions[0].coords.x = x_middle as i16;
         state.snake.positions[0].coords.y = y_middle as i16;
 
         return Ok(state);
+    } else {
+        state.snake.clear()?;
+        state.snake.step();
     }
-
-    state.snake.clear()?;
-    //state.snake.step(); // todo: this line was why snake was dying instantly. On new game, draw_snake steps the snake which creates the head block which is how we worked it pre-vector. so step needs to be later now, and also not called on new game
 
     let mut snake_eaten = false;
 
@@ -68,6 +76,7 @@ fn draw_snake(mut state: GameState) -> Result<GameState, Box<dyn Error>> {
             }
         }
 
+        // Check if Snake hit an arena wall piece
         if state
             .arena
             .positions
@@ -163,6 +172,13 @@ fn draw_diags(state: &GameState) -> Result<(), SnengineError> {
         c_y,
         format!("Current facing: {:?}", state.snake.direction).as_str(),
     )?;
+
+    // Displays head coordinates
+    // Graphics::write(
+    //     30,
+    //     c_y,
+    //     format!("Head coords: {:?}", state.snake.positions[0]).as_str()
+    // )?;
 
     for i in 1..c_x {
         Graphics::draw_char(i, c_y - 1, Unicode::BoxLightHorizontal)?;
