@@ -68,12 +68,6 @@ impl Snake {
                 continue;
             }
 
-            // Don't process snake's inactive blocks.
-            // Todo: do we need this check anymore? With snake now being a vector, every block should be active.
-            // if !c.coords.is_active() {
-            //     continue;
-            // }
-
             new_positions[i].coords.x = self.positions[i - 1].coords.x;
             new_positions[i].coords.y = self.positions[i - 1].coords.y;
             new_positions[i].facing = self.positions[i - 1].facing;
@@ -94,7 +88,7 @@ impl Snake {
             // for the new one.
             let previous_tail = self.positions[a + 1 - 1];
 
-            let mut new_position = SnakeCoords::new(1, 1, previous_tail.facing, true);
+            let mut new_position = SnakeCoords::new(1, 1, previous_tail.facing, previous_tail.active);
 
             match previous_tail.facing {
                 Directions::Up => {
