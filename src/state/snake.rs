@@ -238,8 +238,8 @@ mod tests {
 
         snake.step();
 
-        // Vector should be 1 larger
-        assert_eq!(snake.positions.len(), 14);
+        // Vector should be same length
+        assert_eq!(snake.positions.len(), 13);
 
         // The head should have moved one step up.
         assert_eq!(snake.positions[0].coords.x, 20);
