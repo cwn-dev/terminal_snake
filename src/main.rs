@@ -203,7 +203,6 @@ fn game_loop(file: File) -> Result<GameState, Box<dyn Error>> {
     let mut time_since_draw = Instant::now();
 
     loop {
-        state = InputHandler::handle_input(state, &file);
         draw_arena(&state)?;
         draw_score(&state)?;
         draw_diags(&state)?;
@@ -215,6 +214,7 @@ fn game_loop(file: File) -> Result<GameState, Box<dyn Error>> {
         // Update Snake only after the given duration has passed.
         // This means Snake remains controllable while having fast updates and input.
         if time_since_draw.elapsed() >= Duration::from_millis(100) {
+            state = InputHandler::handle_input(state, &file);
             state = draw_snake(state)?;
             time_since_draw = Instant::now();
         }
